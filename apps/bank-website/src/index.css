@@ -1,0 +1,203 @@
+/* =========================================================
+   Tokens
+   ========================================================= */
+:root {
+  --brand: #12355b;
+  --brand-dark: #0b2440;
+  --brand-light: #e7eef6;
+  --accent: #c9a227;
+  --text: #1a1f26;
+  --muted: #4d5966;
+  --bg: #ffffff;
+  --bg-muted: #f3f5f8;
+  --border: #dde3ea;
+
+  color-scheme: light;
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Arabic', 'Geeza Pro', Tahoma, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+* { box-sizing: border-box; }
+body { margin: 0; }
+h1, h2, h3 { line-height: 1.25; }
+ul { list-style: none; margin: 0; padding: 0; }
+a { color: var(--brand); }
+:focus-visible { outline: 3px solid #d08700; outline-offset: 2px; }
+
+.container { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute; inset-inline-start: -9999px; top: 0; z-index: 1000;
+  background: #fff; padding: 0.5rem 1rem;
+}
+.skip-link:focus { inset-inline-start: 1rem; top: 1rem; }
+
+/* =========================================================
+   Buttons
+   ========================================================= */
+.button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0.6rem 1.25rem;
+  border: 2px solid var(--brand); border-radius: 8px;
+  background: var(--brand); color: #fff;
+  font-weight: 600; text-decoration: none;
+}
+.button:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+.button-outline { background: transparent; color: var(--brand); }
+.button-outline:hover { color: #fff; }
+.button-light { background: #fff; border-color: #fff; color: var(--brand); }
+.button-light:hover { background: var(--brand-light); border-color: var(--brand-light); }
+.button-ghost { background: transparent; border-color: rgb(255 255 255 / 0.7); }
+.button-ghost:hover { background: rgb(255 255 255 / 0.12); border-color: #fff; }
+
+/* =========================================================
+   Header
+   ========================================================= */
+.site-header {
+  position: sticky; top: 0; z-index: 10;
+  background: #fff; border-bottom: 1px solid var(--border);
+}
+.header-inner { display: flex; align-items: center; gap: 2rem; min-height: 68px; }
+.logo {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-weight: 700; font-size: 1.2rem; color: var(--brand); text-decoration: none;
+}
+.logo-mark {
+  display: grid; place-items: center; width: 36px; height: 36px;
+  border-radius: 10px; background: var(--brand); color: var(--accent); font-size: 1.1rem;
+}
+.nav-list { display: flex; gap: 1.5rem; }
+.nav-list a { color: var(--text); text-decoration: none; font-weight: 500; }
+.nav-list a:hover { color: var(--brand); text-decoration: underline; }
+.header-login { margin-inline-start: auto; }
+
+/* =========================================================
+   Hero
+   ========================================================= */
+.hero { background: linear-gradient(135deg, var(--brand), #1d5288); color: #fff; padding: 4.5rem 0; }
+.hero-inner { display: flex; align-items: center; justify-content: space-between; gap: 3rem; }
+.hero-text { max-width: 560px; }
+.eyebrow { margin: 0 0 0.5rem; color: var(--accent); font-weight: 700; font-size: 0.85rem; }
+.hero h1 { font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 1rem; }
+.hero p { margin: 0 0 1.75rem; color: #e3ebf4; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+.hero-card {
+  position: relative; flex-shrink: 0; width: 320px; aspect-ratio: 1.6;
+  border-radius: 18px; padding: 1.5rem;
+  background: linear-gradient(135deg, #0b2440, #2b6cb0);
+  box-shadow: 0 20px 40px rgb(0 0 0 / 0.3);
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 0.5rem;
+}
+.hero-card-chip { position: absolute; top: 1.5rem; inset-inline-start: 1.5rem; width: 44px; height: 32px; border-radius: 6px; background: var(--accent); }
+.hero-card-number { font-size: 1.1rem; letter-spacing: 0.1em; }
+.hero-card-name { font-size: 0.85rem; opacity: 0.8; }
+
+/* =========================================================
+   Quick links
+   ========================================================= */
+.quick-links { margin-top: -1.75rem; }
+.quick-links ul {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: #fff; border-radius: 12px; box-shadow: 0 6px 20px rgb(18 53 91 / 0.12);
+  overflow: hidden;
+}
+.quick-links a {
+  display: block; padding: 1.1rem; text-align: center;
+  font-weight: 600; text-decoration: none; border-inline-end: 1px solid var(--border);
+}
+.quick-links li:last-child a { border-inline-end: 0; }
+.quick-links a:hover { background: var(--brand-light); }
+
+/* =========================================================
+   Sections
+   ========================================================= */
+.section { padding: 3.5rem 1.5rem; }
+.section-muted { background: var(--bg-muted); }
+.section h2 { font-size: 1.6rem; margin: 0 0 1.25rem; }
+.section p { color: var(--muted); }
+
+.card-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.card {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 1.5rem; border: 1px solid var(--border); border-radius: 12px; background: #fff;
+}
+.card h3 { margin: 0; color: var(--brand); }
+.card p { margin: 0; flex: 1; }
+.card-link { font-weight: 600; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+.split h2 { font-size: 1.35rem; margin-bottom: 0.75rem; }
+.split p { margin: 0; }
+
+.news-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.news-item { padding: 1.25rem 1.5rem; border-inline-start: 4px solid var(--accent); background: var(--bg-muted); border-start-end-radius: 8px; border-end-end-radius: 8px; }
+.news-item h3 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+.news-item p { margin: 0; }
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.site-footer { background: var(--brand-dark); color: #d5dfea; padding: 3rem 0 1.5rem; }
+.footer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.footer-title { font-size: 1rem; color: #fff; margin: 0 0 0.75rem; }
+.site-footer li { margin-bottom: 0.4rem; }
+.site-footer a { color: #d5dfea; text-decoration: none; }
+.site-footer a:hover { color: #fff; text-decoration: underline; }
+.footer-bottom { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgb(255 255 255 / 0.15); font-size: 0.9rem; }
+
+/* =========================================================
+   Embedded accessibility widget (iframe from localhost:3001)
+   The bank page only controls size, position and shadow.
+   ========================================================= */
+.widget-frame-container {
+  position: fixed; right: 24px; bottom: 24px; z-index: 2147483000;
+  overflow: hidden; box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+}
+.widget-frame-container.is-closed { width: 60px; height: 60px; border-radius: 50%; }
+.widget-frame-container.is-open {
+  width: 380px; height: min(560px, calc(100dvh - 48px));
+  border-radius: 16px;
+}
+.widget-frame-container.is-open.is-expanded {
+  width: min(1100px, calc(100vw - 48px)); height: calc(100dvh - 48px);
+}
+.widget-frame { display: block; width: 100%; height: 100%; border: 0; background: transparent; }
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width: 900px) {
+  .header-inner { flex-wrap: wrap; column-gap: 1rem; padding-block: 0.5rem; }
+  .main-nav { order: 3; width: 100%; overflow-x: auto; }
+  .nav-list { gap: 1.25rem; padding-bottom: 0.25rem; }
+  .hero-card { display: none; }
+  .quick-links ul { grid-template-columns: repeat(2, 1fr); }
+  .quick-links li:nth-child(2) a { border-inline-end: 0; }
+  .quick-links li:nth-child(-n + 2) a { border-bottom: 1px solid var(--border); }
+  .split, .news-list { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 3rem 0 3.5rem; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .widget-frame-container.is-closed { right: 16px; bottom: 16px; }
+}
+
+/* Mobile: the open widget takes the full screen. */
+@media (max-width: 480px) {
+  .widget-frame-container.is-open,
+  .widget-frame-container.is-open.is-expanded {
+    inset: 0; width: 100%; height: 100%; border-radius: 0;
+  }
+}

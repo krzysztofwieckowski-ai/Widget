@@ -1,0 +1,18 @@
+{
+  "name": "accessibility-assistance-poc",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n bank,widget -c blue,magenta \"npm run dev -w bank-website\" \"npm run dev -w accessibility-widget\"",
+    "dev:bank": "npm run dev -w bank-website",
+    "dev:widget": "npm run dev -w accessibility-widget",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

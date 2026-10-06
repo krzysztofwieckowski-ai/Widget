@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Translation } from '../i18n';
 import ParticipantTile from '../components/ParticipantTile';
 import CallControls from '../components/CallControls';
-import { HeadsetIcon, TranslatorIcon, UserIcon } from '../components/icons';
+import { TranslatorIcon, UserIcon } from '../components/icons';
 
 type Props = { t: Translation; onEndCall: () => void };
 
@@ -12,7 +12,7 @@ function formatDuration(totalSeconds: number) {
   return `${minutes}:${seconds}`;
 }
 
-/** One shared mock call: Customer + Support Agent + Translator. */
+/** One shared mock call: User (not shown) + client (main view: the user's front camera) + sign language translator. */
 export default function VideoCallScreen({ t, onEndCall }: Props) {
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
@@ -48,9 +48,12 @@ export default function VideoCallScreen({ t, onEndCall }: Props) {
         <p className="call-shared-note">{t.callSharedNote}</p>
         <ul className="call-tiles" aria-label={t.callParticipants}>
           <ParticipantTile
-            variant="agent"
-            name={t.agent}
-            avatar={<HeadsetIcon />}
+            variant="self"
+            name={t.client}
+            avatar={<UserIcon />}
+            photo="/images/client.png"
+            muted={muted}
+            cameraOff={cameraOff}
             cameraOffLabel={t.cameraOff}
             mutedLabel={t.micOff}
           />
@@ -58,15 +61,7 @@ export default function VideoCallScreen({ t, onEndCall }: Props) {
             variant="translator"
             name={t.translator}
             avatar={<TranslatorIcon />}
-            cameraOffLabel={t.cameraOff}
-            mutedLabel={t.micOff}
-          />
-          <ParticipantTile
-            variant="self"
-            name={t.you}
-            avatar={<UserIcon />}
-            muted={muted}
-            cameraOff={cameraOff}
+            photo="/images/translator.png"
             cameraOffLabel={t.cameraOff}
             mutedLabel={t.micOff}
           />

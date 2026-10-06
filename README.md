@@ -2,8 +2,8 @@
 
 Proof of concept of a **universal** accessibility assistance widget that any website needing support can embed
 (here demonstrated on a mock bank website). A person with a disability can request **one** video call with a
-**support agent and a translator together**. The widget contains no site-specific wording, so it is not tied to banking.
-There is no login, no backend and no real video. Everything is simulated in the frontend.
+**translator**. The widget contains no site-specific wording, so it is not tied to banking.
+The sign-in is a mock (any non-empty username and password work), and there is no backend and no real video. Everything is simulated in the frontend.
 
 The repository contains two **independent** React + TypeScript (Vite) apps:
 
@@ -47,10 +47,10 @@ closed → welcome → request → waiting (~2 s) → video call → call ended 
 ```
 
 1. Click the accessibility launcher. The panel opens in **Arabic (RTL)** by default.
-2. **Welcome**: "هل تحتاج إلى مساعدة؟" → *طلب المساعدة*.
-3. **Assistance request**: explains that the support agent **and** the translator join together. There is nothing to choose. The button *بدء مكالمة الفيديو* (Start video call) starts the call right away.
+2. **Welcome / sign-in**: "هل تحتاج إلى مساعدة؟" with a username and password form. Any non-empty credentials are accepted (nothing is sent or stored) → *تسجيل الدخول*.
+3. **Assistance request**: explains that the request connects the customer with a translator. There is nothing to choose. The button *بدء مكالمة الفيديو* (Start video call) starts the call right away.
 4. **Waiting**: spinner for about 2 seconds, then the call opens automatically. *Cancel request* goes back to the previous screen.
-5. **Video call**: one shared call with three tiles (support agent, translator, you). Mute and Stop video are visual toggles. **End call** ends the whole call.
+5. **Video call**: one shared call with two tiles (translator, you). Mute and Stop video are visual toggles. **End call** ends the whole call.
 6. **Call ended**: the customer can rate the call with 1–5 stars (click, or use the arrow keys). The rating is only kept in the widget state and not sent anywhere. *إغلاق* closes the panel and returns to the launcher. The next time it opens, it starts at the welcome screen.
 
 Switching to **English** at any point changes the language and direction without restarting the flow.

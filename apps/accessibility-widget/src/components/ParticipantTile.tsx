@@ -4,7 +4,9 @@ import { MicOffIcon, VideoOffIcon } from './icons';
 type ParticipantTileProps = {
   name: string;
   avatar: ReactNode;
-  variant: 'agent' | 'translator' | 'self';
+  /** Mock "video": a still photo shown while the camera is on. */
+  photo?: string;
+  variant: 'translator' | 'self';
   cameraOff?: boolean;
   muted?: boolean;
   cameraOffLabel: string;
@@ -15,6 +17,7 @@ type ParticipantTileProps = {
 export default function ParticipantTile({
   name,
   avatar,
+  photo,
   variant,
   cameraOff = false,
   muted = false,
@@ -23,7 +26,11 @@ export default function ParticipantTile({
 }: ParticipantTileProps) {
   return (
     <li className={`tile tile--${variant}${cameraOff ? ' tile--camera-off' : ''}`}>
-      <div className="tile-avatar">{avatar}</div>
+      {photo && !cameraOff ? (
+        <img className="tile-photo" src={photo} alt="" />
+      ) : (
+        <div className="tile-avatar">{avatar}</div>
+      )}
 
       {cameraOff && (
         <span className="tile-status">

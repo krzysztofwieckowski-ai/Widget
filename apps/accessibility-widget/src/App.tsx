@@ -10,7 +10,7 @@ import WaitingScreen from './screens/WaitingScreen';
 import VideoCallScreen from './screens/VideoCallScreen';
 import CallEndedScreen from './screens/CallEndedScreen';
 
-// Simulated time to "prepare" the support agent and translator. No real availability check.
+// Simulated time to "prepare" the translator. No real availability check.
 const WAITING_TIME_MS = 2000;
 
 // On phones the open panel is already full screen, so the enlarge button is not shown.

@@ -25,18 +25,14 @@ export const initialCallHistory: CallRecord[] = [
     callId: 'CALL-098',
     endedAt: '2026-10-06T09:14:00',
     facilityId: 'RIYADH_001',
-    language: 'Arabic',
     durationSeconds: 8 * 60 + 32,
-    withTranslator: true,
     outcome: 'COMPLETED',
   },
   {
     callId: 'CALL-097',
     endedAt: '2026-10-05T15:40:00',
     facilityId: 'RIYADH_001',
-    language: 'English',
     durationSeconds: 4 * 60 + 15,
-    withTranslator: false,
     outcome: 'COMPLETED',
   },
 ];

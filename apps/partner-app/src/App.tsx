@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CallRecord, FacilityId, IncomingCall, Language, Page, Partner, PartnerStatus } from './types';
+import type { CallRecord, IncomingCall, Language, Page, Partner, PartnerStatus } from './types';
 import { getDirection, translations } from './i18n';
 import { createIncomingCall, getRoutingResult, initialCallHistory } from './mock/calls';
+import { RINGTONE_MAX_MS, startRingtone, stopRingtone, unlockAudio } from './utils/ringtone';
+import {
+  isNotificationBlocked,
+  requestNotificationPermission,
+  showIncomingCallNotification,
+} from './utils/systemNotification';
 import Header from './components/Header/Header';
 import LoginPage from './pages/Login/LoginPage';
-import DashboardPage, { type RoutingMessage } from './pages/Dashboard/DashboardPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
 import CallPage, { type CallResult } from './pages/Call/CallPage';
 import HistoryPage from './pages/History/HistoryPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
 const LANGUAGE_STORAGE_KEY = 'partner-app:language';
+
+/** Delay of the "Simulate in 5 s" demo button, so testers can switch to another tab first. */
+const SIMULATE_DELAY_S = 5;
 
 function getInitialLanguage(): Language {
   return localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'ar' ? 'ar' : 'en';
@@ -30,19 +39,43 @@ export default function App() {
   const [activeCall, setActiveCall] = useState<IncomingCall | null>(null);
   const [history, setHistory] = useState<CallRecord[]>(initialCallHistory);
   const [endedCall, setEndedCall] = useState<CallRecord | null>(null);
-  const [routingMessage, setRoutingMessage] = useState<RoutingMessage>(null);
+  const [callNotRouted, setCallNotRouted] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const [isRinging, setIsRinging] = useState(false);
+  const [isCallPending, setIsCallPending] = useState(false);
 
   const isFirstRender = useRef(true);
+  const pendingCallTimeout = useRef<number | null>(null);
+  const callNotification = useRef<Notification | null>(null);
   const t = translations[language];
+
+  // A delayed simulated call must use the partner status and language at delivery time, not at click time.
+  const latest = useRef({ partner, t });
+  latest.current = { partner, t };
 
   // Language and text direction apply to the whole document, so the entire layout mirrors in Arabic.
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = getDirection(language);
-    document.title = `${t.appName} · ${t.portalName}`;
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-  }, [language, t]);
+  }, [language]);
+
+  // The tab title shows a waiting call, so it is visible in the tab bar from another tab.
+  useEffect(() => {
+    const baseTitle = `${t.appName} · ${t.portalName}`;
+    document.title = incomingCall ? `(1) ${t.tabTitleIncoming} · ${baseTitle}` : baseTitle;
+  }, [t, incomingCall]);
+
+  // Ringtone while a call is waiting; stops on join, on "Silence ringtone" or after RINGTONE_MAX_MS.
+  useEffect(() => {
+    if (!isRinging) return;
+    startRingtone();
+    const timeoutId = window.setTimeout(() => setIsRinging(false), RINGTONE_MAX_MS);
+    return () => {
+      window.clearTimeout(timeoutId);
+      stopRingtone();
+    };
+  }, [isRinging]);
 
   // Focus management: move focus to the new page heading (not on the very first load).
   useEffect(() => {
@@ -62,19 +95,25 @@ export default function App() {
   function navigate(nextPage: Page) {
     setPage(nextPage);
     setEndedCall(null);
-    setRoutingMessage(null);
+    setCallNotRouted(false);
   }
 
   function handleLogin(loggedInPartner: Partner) {
+    // The login click is a user gesture: unlock audio so later calls can ring even in a background tab.
+    unlockAudio();
     setPartner(loggedInPartner);
     setPage('dashboard');
   }
 
   function handleLogout() {
+    stopAlerting();
+    if (pendingCallTimeout.current !== null) window.clearTimeout(pendingCallTimeout.current);
+    pendingCallTimeout.current = null;
+    setIsCallPending(false);
     setPartner(null);
     setIncomingCall(null);
     setEndedCall(null);
-    setRoutingMessage(null);
+    setCallNotRouted(false);
   }
 
   function handleStatusChange(status: PartnerStatus) {
@@ -82,30 +121,75 @@ export default function App() {
     announce(t.statusChanged(t.statusLabels[status]));
   }
 
-  function simulateIncomingCall(facilityId: FacilityId) {
-    if (!partner) return;
-    const call = createIncomingCall(facilityId);
-    const result = getRoutingResult(call, partner);
+  /**
+   * Delivers a simulated PWD widget call from the partner's own facility (the only calls a partner
+   * ever sees): card + nav badge, ringtone, screen-reader announcement, tab title and — if this tab
+   * is in the background — a system notification.
+   */
+  function deliverIncomingCall() {
+    const { partner: currentPartner, t: currentT } = latest.current;
+    if (!currentPartner) return;
+    const call = createIncomingCall(currentPartner.facilityId);
+    const isRouted = getRoutingResult(call, currentPartner) === 'routed';
+    setCallNotRouted(!isRouted);
+    if (!isRouted) return;
 
-    if (result === 'routed') {
-      setRoutingMessage(null);
-      setIncomingCall(call);
-      announce(t.incomingAnnouncement(t.facilities[call.facilityId], t.callLanguages[call.language]));
-    } else if (result === 'other-facility') {
-      setRoutingMessage({ type: 'other-facility', facilityId });
-    } else {
-      setRoutingMessage({ type: 'partner-unavailable' });
-    }
+    const message = currentT.incomingAnnouncement(currentT.facilities[call.facilityId]);
+    setIncomingCall(call);
+    setIsRinging(true);
+    announce(message);
+    callNotification.current = showIncomingCallNotification(currentT.newAccessibilityCall, message, call.callId);
+  }
+
+  function simulateIncomingCall() {
+    unlockAudio();
+    deliverIncomingCall();
+  }
+
+  function simulateDelayedCall() {
+    unlockAudio();
+    requestNotificationPermission();
+    setIsCallPending(true);
+    pendingCallTimeout.current = window.setTimeout(() => {
+      pendingCallTimeout.current = null;
+      setIsCallPending(false);
+      deliverIncomingCall();
+    }, SIMULATE_DELAY_S * 1000);
+  }
+
+  function stopAlerting() {
+    setIsRinging(false);
+    callNotification.current?.close();
+    callNotification.current = null;
   }
 
   function joinCall() {
     if (!incomingCall) return;
+    stopAlerting();
     setActiveCall(incomingCall);
     setIncomingCall(null);
     setEndedCall(null);
-    setRoutingMessage(null);
+    setCallNotRouted(false);
     setPartner((current) => (current ? { ...current, status: 'BUSY' } : current));
     setPage('call');
+  }
+
+  /** Declining stops the alerts and logs the call in the history; the partner stays on the dashboard. */
+  function declineCall() {
+    if (!incomingCall) return;
+    stopAlerting();
+    const record: CallRecord = {
+      callId: incomingCall.callId,
+      endedAt: new Date().toISOString(),
+      facilityId: incomingCall.facilityId,
+      durationSeconds: 0,
+      outcome: 'DECLINED',
+    };
+    setHistory((calls) => [record, ...calls]);
+    setIncomingCall(null);
+    // No banner; screen-reader users still hear what happened, and focus leaves the removed card.
+    announce(t.callDeclinedNotice);
+    window.requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-page-heading]')?.focus());
   }
 
   function endCall({ started, durationSeconds }: CallResult) {
@@ -114,27 +198,28 @@ export default function App() {
       callId: activeCall.callId,
       endedAt: new Date().toISOString(),
       facilityId: activeCall.facilityId,
-      language: activeCall.language,
       durationSeconds,
-      // A call only starts once the translator has joined, so every started call had one.
-      withTranslator: started,
       outcome: started ? 'COMPLETED' : 'CANCELLED',
     };
     setHistory((calls) => [record, ...calls]);
     setActiveCall(null);
-    setEndedCall(record);
+    // A normally finished call needs no message; only a call cancelled from the lobby is explained.
+    setEndedCall(started ? null : record);
     setPartner((current) => (current ? { ...current, status: 'AVAILABLE' } : current));
     setPage('dashboard');
   }
 
   function renderPage(currentPartner: Partner) {
+    // A partner only ever sees calls from their own facility.
+    const ownFacilityHistory = history.filter((call) => call.facilityId === currentPartner.facilityId);
+
     switch (page) {
       case 'call':
         return activeCall ? (
           <CallPage t={t} language={language} partner={currentPartner} call={activeCall} onEndCall={endCall} />
         ) : null;
       case 'history':
-        return <HistoryPage t={t} language={language} history={history} />;
+        return <HistoryPage t={t} language={language} history={ownFacilityHistory} />;
       case 'profile':
         return <ProfilePage t={t} language={language} partner={currentPartner} />;
       case 'dashboard':
@@ -146,9 +231,16 @@ export default function App() {
             onStatusChange={handleStatusChange}
             incomingCall={incomingCall}
             onJoinCall={joinCall}
+            onDeclineCall={declineCall}
             onSimulateCall={simulateIncomingCall}
-            routingMessage={routingMessage}
-            history={history}
+            onSimulateDelayedCall={simulateDelayedCall}
+            simulateDelaySeconds={SIMULATE_DELAY_S}
+            isCallPending={isCallPending}
+            isRinging={isRinging}
+            onSilenceRingtone={() => setIsRinging(false)}
+            notificationsBlocked={isNotificationBlocked()}
+            callNotRouted={callNotRouted}
+            history={ownFacilityHistory}
             endedCall={endedCall}
             onDismissEndedCall={() => setEndedCall(null)}
             onNavigate={navigate}

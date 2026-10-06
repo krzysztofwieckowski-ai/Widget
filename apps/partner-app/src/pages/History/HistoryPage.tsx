@@ -1,7 +1,7 @@
 import type { CallRecord, Language } from '../../types';
 import type { Translation } from '../../i18n';
 import { formatDate, formatDuration } from '../../utils/format';
-import { CheckCircleIcon, CloseIcon } from '../../components/icons';
+import OutcomeBadge from '../../components/OutcomeBadge/OutcomeBadge';
 
 type HistoryPageProps = { t: Translation; language: Language; history: CallRecord[] };
 
@@ -21,17 +21,7 @@ export default function HistoryPage({ t, language, history }: HistoryPageProps) 
             <li key={call.callId} className="card history-item">
               <div className="history-item-header">
                 <h2 className="history-date">{formatDate(call.endedAt, language)}</h2>
-                {call.outcome === 'COMPLETED' ? (
-                  <span className="outcome-badge">
-                    <CheckCircleIcon />
-                    {t.completed}
-                  </span>
-                ) : (
-                  <span className="outcome-badge outcome-badge--cancelled">
-                    <CloseIcon />
-                    {t.cancelled}
-                  </span>
-                )}
+                <OutcomeBadge t={t} outcome={call.outcome} />
               </div>
               <dl className="details-grid">
                 <div>
@@ -39,18 +29,12 @@ export default function HistoryPage({ t, language, history }: HistoryPageProps) 
                   <dd>{t.facilities[call.facilityId]}</dd>
                 </div>
                 <div>
-                  <dt>{t.language}</dt>
-                  <dd>{t.callLanguages[call.language]}</dd>
-                </div>
-                <div>
                   <dt>{t.duration}</dt>
                   <dd>
-                    <span dir="ltr" className="tabular">{formatDuration(call.durationSeconds)}</span>
+                    <span dir="ltr" className="tabular">
+                      {call.outcome === 'COMPLETED' ? formatDuration(call.durationSeconds) : '—'}
+                    </span>
                   </dd>
-                </div>
-                <div>
-                  <dt>{t.translatorUsed}</dt>
-                  <dd>{call.withTranslator ? t.yes : t.no}</dd>
                 </div>
                 <div>
                   <dt>{t.callId}</dt>

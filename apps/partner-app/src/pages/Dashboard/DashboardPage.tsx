@@ -1,17 +1,11 @@
-import type { CallRecord, FacilityId, IncomingCall as IncomingCallData, Language, Page, Partner, PartnerStatus } from '../../types';
+import type { CallRecord, IncomingCall as IncomingCallData, Language, Page, Partner, PartnerStatus } from '../../types';
 import type { Translation } from '../../i18n';
-import { FACILITIES } from '../../mock/facilities';
 import { displayName, formatDate, formatDuration } from '../../utils/format';
-import StatusSelector from '../../components/StatusSelector/StatusSelector';
+import StatusSwitch from '../../components/StatusSwitch/StatusSwitch';
 import IncomingCall from '../../components/IncomingCall/IncomingCall';
 import Notice from '../../components/Notice/Notice';
+import OutcomeBadge from '../../components/OutcomeBadge/OutcomeBadge';
 import { BuildingIcon, ChevronForwardIcon, PhoneIncomingIcon, UserIcon } from '../../components/icons';
-
-/** Result of the last "Simulate ..." click that did not produce an incoming call. */
-export type RoutingMessage =
-  | { type: 'other-facility'; facilityId: FacilityId }
-  | { type: 'partner-unavailable' }
-  | null;
 
 type DashboardPageProps = {
   t: Translation;
@@ -20,8 +14,17 @@ type DashboardPageProps = {
   onStatusChange: (status: PartnerStatus) => void;
   incomingCall: IncomingCallData | null;
   onJoinCall: () => void;
-  onSimulateCall: (facilityId: FacilityId) => void;
-  routingMessage: RoutingMessage;
+  onDeclineCall: () => void;
+  onSimulateCall: () => void;
+  onSimulateDelayedCall: () => void;
+  simulateDelaySeconds: number;
+  /** A delayed simulated call is on its way. */
+  isCallPending: boolean;
+  isRinging: boolean;
+  onSilenceRingtone: () => void;
+  notificationsBlocked: boolean;
+  /** The last simulated call was not routed because the partner is not Available. */
+  callNotRouted: boolean;
   history: CallRecord[];
   endedCall: CallRecord | null;
   onDismissEndedCall: () => void;
@@ -37,15 +40,22 @@ export default function DashboardPage({
   onStatusChange,
   incomingCall,
   onJoinCall,
+  onDeclineCall,
   onSimulateCall,
-  routingMessage,
+  onSimulateDelayedCall,
+  simulateDelaySeconds,
+  isCallPending,
+  isRinging,
+  onSilenceRingtone,
+  notificationsBlocked,
+  callNotRouted,
   history,
   endedCall,
   onDismissEndedCall,
   onNavigate,
 }: DashboardPageProps) {
-  const otherFacility = FACILITIES.find((facility) => facility !== partner.facilityId)!;
   const isAvailable = partner.status === 'AVAILABLE';
+  const canSimulate = incomingCall === null && !isCallPending;
   const recentCalls = history.slice(0, RECENT_CALLS_COUNT);
 
   return (
@@ -54,11 +64,10 @@ export default function DashboardPage({
         {t.dashboardTitle}
       </h1>
 
-      {endedCall && (
-        <Notice tone={endedCall.outcome === 'COMPLETED' ? 'success' : 'info'} onDismiss={onDismissEndedCall} dismissLabel={t.dismiss}>
-          {endedCall.outcome === 'COMPLETED'
-            ? t.callEndedNotice(formatDuration(endedCall.durationSeconds))
-            : t.callCancelledNotice}
+      {/* Only a call cancelled from the lobby gets a message; finished and declined calls do not. */}
+      {endedCall?.outcome === 'CANCELLED' && (
+        <Notice onDismiss={onDismissEndedCall} dismissLabel={t.dismiss}>
+          {t.callCancelledNotice}
         </Notice>
       )}
 
@@ -78,7 +87,7 @@ export default function DashboardPage({
               </p>
             </div>
           </div>
-          <StatusSelector t={t} status={partner.status} onChange={onStatusChange} />
+          <StatusSwitch t={t} status={partner.status} onChange={onStatusChange} />
         </section>
 
         <section className="card" aria-labelledby="incoming-calls-title">
@@ -87,7 +96,14 @@ export default function DashboardPage({
           </h2>
 
           {incomingCall ? (
-            <IncomingCall t={t} call={incomingCall} onJoin={onJoinCall} />
+            <IncomingCall
+              t={t}
+              call={incomingCall}
+              onJoin={onJoinCall}
+              onDecline={onDeclineCall}
+              isRinging={isRinging}
+              onSilence={onSilenceRingtone}
+            />
           ) : (
             <div className="empty-state">
               <PhoneIncomingIcon />
@@ -107,26 +123,22 @@ export default function DashboardPage({
               <button
                 type="button"
                 className="button button--secondary button--small"
-                aria-disabled={incomingCall !== null}
-                onClick={incomingCall ? undefined : () => onSimulateCall(partner.facilityId)}
+                aria-disabled={!canSimulate}
+                onClick={canSimulate ? onSimulateCall : undefined}
               >
                 {t.simulateIncomingCall}
               </button>
               <button
                 type="button"
                 className="button button--ghost button--small"
-                onClick={() => onSimulateCall(otherFacility)}
+                aria-disabled={!canSimulate}
+                onClick={canSimulate ? onSimulateDelayedCall : undefined}
               >
-                {t.simulateOtherFacility(t.facilities[otherFacility])}
+                {isCallPending ? t.simulatePending(simulateDelaySeconds) : t.simulateDelayed(simulateDelaySeconds)}
               </button>
             </div>
-            {routingMessage && (
-              <Notice>
-                {routingMessage.type === 'other-facility'
-                  ? t.callRoutedElsewhere(t.facilities[routingMessage.facilityId])
-                  : t.callNotRoutedUnavailable}
-              </Notice>
-            )}
+            {callNotRouted && <Notice>{t.callNotRoutedUnavailable}</Notice>}
+            {notificationsBlocked && <Notice>{t.notificationsBlocked}</Notice>}
           </div>
         </section>
 
@@ -142,7 +154,7 @@ export default function DashboardPage({
                 <tr>
                   <th scope="col">{t.date}</th>
                   <th scope="col">{t.facility}</th>
-                  <th scope="col">{t.language}</th>
+                  <th scope="col">{t.outcomeLabel}</th>
                   <th scope="col">{t.duration}</th>
                 </tr>
               </thead>
@@ -151,10 +163,12 @@ export default function DashboardPage({
                   <tr key={call.callId}>
                     <td>{formatDate(call.endedAt, language, false)}</td>
                     <td>{t.facilityShort[call.facilityId]}</td>
-                    <td>{t.callLanguages[call.language]}</td>
+                    <td>
+                      <OutcomeBadge t={t} outcome={call.outcome} />
+                    </td>
                     <td>
                       <span dir="ltr" className="tabular">
-                        {formatDuration(call.durationSeconds)}
+                        {call.outcome === 'COMPLETED' ? formatDuration(call.durationSeconds) : '—'}
                       </span>
                     </td>
                   </tr>

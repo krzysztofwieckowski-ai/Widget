@@ -22,18 +22,16 @@ export const en = {
   showPassword: 'Show password',
   hidePassword: 'Hide password',
   loginButton: 'Login',
-  loginError: 'Incorrect email or password. Please try again.',
-  demoCredentials: 'Demo credentials',
-  fillDemoCredentials: 'Fill in demo credentials',
+  loginError: 'Enter a valid email address and a password.',
 
   // Status
   status: 'Status',
   statusLabels: {
     AVAILABLE: 'Available',
     BUSY: 'Busy',
-    AWAY: 'Away',
     OFFLINE: 'Offline',
   } satisfies Record<PartnerStatus, string>,
+  availabilitySwitchHint: 'Turn off to stop receiving calls.',
   statusChanged: (status: string) => `Status changed to ${status}.`,
 
   // Dashboard
@@ -48,22 +46,26 @@ export const en = {
   language: 'Language',
   callId: 'Call ID',
   joinCall: 'Join call',
-  incomingAnnouncement: (facility: string, language: string) =>
-    `New accessibility call from ${facility}. Language: ${language}.`,
+  declineCall: 'Decline',
+  incomingAnnouncement: (facility: string) => `New accessibility call from ${facility}.`,
   demoTools: 'Demo tools',
-  demoToolsNote: 'For testing only. Simulates a call request sent from the PWD widget.',
+  demoToolsNote:
+    'For testing only. Simulates a call request sent from the PWD widget. Incoming calls ring and, when this tab is in the background, show a system notification.',
   simulateIncomingCall: 'Simulate incoming call',
-  simulateOtherFacility: (facility: string) => `Simulate call for ${facility}`,
-  callRoutedElsewhere: (facility: string) =>
-    `A call for ${facility} was not routed to you. You only receive calls from your own branch.`,
+  simulateDelayed: (seconds: number) => `Simulate in ${seconds} s (switch tabs to test)`,
+  simulatePending: (seconds: number) => `Call arriving in ${seconds} s…`,
+  silenceRingtone: 'Silence ringtone',
+  ringtoneOff: 'Ringtone off',
+  tabTitleIncoming: 'Incoming call',
+  notificationsBlocked: 'System notifications are blocked in this browser. You will still hear the ringtone.',
   callNotRoutedUnavailable: 'The call was not routed to you because your status is not Available.',
   recentCalls: 'Recent calls',
   date: 'Date',
   duration: 'Duration',
   viewCallHistory: 'View call history',
   noCallsYet: 'No calls yet.',
-  callEndedNotice: (duration: string) => `Call ended (${duration}). It was added to your call history.`,
   callCancelledNotice: 'You left before the call started. It was added to your call history as cancelled.',
+  callDeclinedNotice: 'You declined the call. It was added to your call history as declined.',
   dismiss: 'Dismiss',
 
   // Call
@@ -92,9 +94,8 @@ export const en = {
   mute: 'Mute',
   camera: 'Camera',
   searchingTranslator: 'Looking for an available translator...',
-  translatorFound: (name: string, languages: string) =>
-    `Translator found: ${name} (${languages}). Connecting...`,
-  translatorJoined: (name: string, languages: string) => `${name} (${languages}) joined the call as translator.`,
+  translatorFound: (name: string) => `Translator found: ${name}. Connecting...`,
+  translatorJoined: (name: string) => `${name} joined the call as translator.`,
   endCall: 'End call',
   endCallTitle: 'End this call?',
   endCallDescription: 'The call will end for everyone: the PWD user, you and the translator.',
@@ -105,12 +106,11 @@ export const en = {
 
   // History
   historyTitle: 'Call history',
-  translatorUsed: 'Translator',
-  yes: 'Yes',
-  no: 'No',
-  outcome: 'Result',
+
+  outcomeLabel: 'Result',
   completed: 'Completed',
   cancelled: 'Cancelled',
+  declined: 'Declined',
   noHistory: 'You have no calls yet. Completed calls will appear here.',
 
   // Profile

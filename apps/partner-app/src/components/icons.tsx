@@ -263,3 +263,21 @@ export function EyeOffIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function BellIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </Icon>
+  );
+}
+
+export function BellOffIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M8.5 5.6A6 6 0 0 1 18 11v4M6 11v5l-1.5 2H16M10 20.5a2 2 0 0 0 4 0" />
+      <path d="M3 3l18 18" />
+    </Icon>
+  );
+}

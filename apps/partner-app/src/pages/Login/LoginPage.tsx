@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import type { Language, Partner } from '../../types';
 import type { Translation } from '../../i18n';
-import { authenticate, DEMO_CREDENTIALS } from '../../mock/partner';
+import { authenticate } from '../../mock/partner';
 import LanguageSwitcher from '../../components/LanguageSwitcher/LanguageSwitcher';
-import { AccessibilityIcon, EyeIcon, EyeOffIcon, InfoIcon } from '../../components/icons';
+import { AccessibilityIcon, EyeIcon, EyeOffIcon } from '../../components/icons';
 
 type LoginPageProps = {
   t: Translation;
@@ -12,7 +12,7 @@ type LoginPageProps = {
   onLogin: (partner: Partner) => void;
 };
 
-/** Mock login. Only the demo credentials are accepted; nothing is sent anywhere. */
+/** Mock login. Any valid email and any password are accepted; nothing is sent anywhere. */
 export default function LoginPage({ t, language, onLanguageChange, onLogin }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,12 +27,6 @@ export default function LoginPage({ t, language, onLanguageChange, onLogin }: Lo
     } else {
       setHasError(true);
     }
-  }
-
-  function fillDemoCredentials() {
-    setEmail(DEMO_CREDENTIALS.email);
-    setPassword(DEMO_CREDENTIALS.password);
-    setHasError(false);
   }
 
   const passwordToggleLabel = showPassword ? t.hidePassword : t.showPassword;
@@ -115,20 +109,6 @@ export default function LoginPage({ t, language, onLanguageChange, onLogin }: Lo
             {t.loginButton}
           </button>
 
-          <aside className="demo-box" aria-labelledby="demo-credentials-title">
-            <p id="demo-credentials-title" className="demo-box-title">
-              <InfoIcon />
-              {t.demoCredentials}
-            </p>
-            <p className="demo-credentials">
-              <span dir="ltr">{DEMO_CREDENTIALS.email}</span>
-              <br />
-              <span dir="ltr">{DEMO_CREDENTIALS.password}</span>
-            </p>
-            <button type="button" className="button button--secondary button--small" onClick={fillDemoCredentials}>
-              {t.fillDemoCredentials}
-            </button>
-          </aside>
         </form>
       </div>
     </main>

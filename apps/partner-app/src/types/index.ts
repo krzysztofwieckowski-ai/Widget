@@ -1,6 +1,7 @@
 export type Language = 'en' | 'ar';
 
-export type PartnerStatus = 'AVAILABLE' | 'BUSY' | 'AWAY' | 'OFFLINE';
+/** The partner switches between AVAILABLE and OFFLINE; BUSY is set automatically during a call. */
+export type PartnerStatus = 'AVAILABLE' | 'BUSY' | 'OFFLINE';
 
 export type FacilityId = 'RIYADH_001' | 'JEDDAH_001' | 'DAMMAM_001';
 
@@ -41,14 +42,18 @@ export interface Translator {
  */
 export type TranslatorState = 'searching' | 'connecting' | 'connected';
 
+export type CallOutcome = 'COMPLETED' | 'CANCELLED' | 'DECLINED';
+
 export interface CallRecord {
   callId: string;
   /** ISO date-time of when the call ended. */
   endedAt: string;
   facilityId: FacilityId;
-  language: CallLanguage;
   durationSeconds: number;
-  withTranslator: boolean;
-  /** CANCELLED = the partner left before every role joined, so the call never started. */
-  outcome: 'COMPLETED' | 'CANCELLED';
+  /**
+   * COMPLETED = all three roles joined (a call never runs without a translator).
+   * CANCELLED = the partner left the lobby before everyone joined.
+   * DECLINED  = the partner declined the incoming call.
+   */
+  outcome: CallOutcome;
 }

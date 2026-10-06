@@ -6,7 +6,7 @@ import { displayName, formatDuration } from '../../utils/format';
 import ParticipantCard from '../../components/ParticipantCard/ParticipantCard';
 import CallControls from '../../components/CallControls/CallControls';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
-import { AccessibilityIcon, HeadsetIcon, TranslatorIcon } from '../../components/icons';
+import { AccessibilityIcon, CheckCircleIcon, HeadsetIcon, TranslatorIcon } from '../../components/icons';
 
 /** `started: false` = the partner left the lobby before every role joined. */
 export type CallResult = { started: boolean; durationSeconds: number };
@@ -21,6 +21,9 @@ type CallPageProps = {
 
 const TOTAL_PARTICIPANTS = 3;
 
+/** How long the "call has started" confirmation stays over the cameras. */
+const STARTED_BANNER_MS = 2500;
+
 /**
  * The partner's side of the shared call. Mock only: no audio, video or WebRTC.
  *
@@ -34,8 +37,17 @@ export default function CallPage({ t, language, partner, call, onEndCall }: Call
   const [seconds, setSeconds] = useState(0);
   const [translatorState, setTranslatorState] = useState<TranslatorState>('searching');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [showStartedBanner, setShowStartedBanner] = useState(false);
 
   const isStarted = translatorState === 'connected';
+
+  // Briefly confirm over the cameras that everyone joined, then get out of the way.
+  useEffect(() => {
+    if (!isStarted) return;
+    setShowStartedBanner(true);
+    const id = window.setTimeout(() => setShowStartedBanner(false), STARTED_BANNER_MS);
+    return () => window.clearTimeout(id);
+  }, [isStarted]);
 
   // Simulated translator matching: searching → found & connecting → connected.
   useEffect(() => {
@@ -62,8 +74,8 @@ export default function CallPage({ t, language, partner, call, onEndCall }: Call
 
   const statusText = {
     searching: t.searchingTranslator,
-    connecting: t.translatorFound(translatorName, translatorLanguages),
-    connected: `${t.translatorJoined(translatorName, translatorLanguages)} ${t.callStarted}`,
+    connecting: t.translatorFound(translatorName),
+    connected: t.translatorJoined(translatorName),
   }[translatorState];
 
   return (
@@ -112,6 +124,23 @@ export default function CallPage({ t, language, partner, call, onEndCall }: Call
         </div>
 
         <div className="call-stage">
+          {/* Lobby status in the middle of the cameras, where the partner is looking.
+              Visual only: the same text is announced by the live region below. */}
+          {(!isStarted || showStartedBanner) && (
+            <div className="call-overlay" aria-hidden="true">
+              <div className={`call-overlay-card${isStarted ? ' call-overlay-card--started' : ''}`}>
+                {isStarted ? (
+                  <CheckCircleIcon className="call-overlay-icon" />
+                ) : (
+                  <span className="spinner" />
+                )}
+                <p className="call-overlay-title">{isStarted ? t.callStarted : statusText}</p>
+                <p className="call-overlay-text">
+                  {isStarted ? statusText : `${t.joinedCount(joinedCount, TOTAL_PARTICIPANTS)} · ${t.lobbyNote}`}
+                </p>
+              </div>
+            </div>
+          )}
           <ul className="call-tiles" aria-label={t.participants}>
             <ParticipantCard
               variant="pwd"
@@ -153,13 +182,9 @@ export default function CallPage({ t, language, partner, call, onEndCall }: Call
           </ul>
         </div>
 
-        <div className="call-progress">
-          <p className={`call-translator-status call-translator-status--${translatorState}`} role="status">
-            {!isStarted && <span className="spinner spinner--small" aria-hidden="true" />}
-            {statusText}
-          </p>
-          {!isStarted && <p className="call-lobby-note">{t.lobbyNote}</p>}
-        </div>
+        <p className="visually-hidden" role="status">
+          {isStarted ? `${statusText} ${t.callStarted}` : statusText}
+        </p>
 
         {/* State changes of the visual-only toggles, for screen-reader users. */}
         <p className="visually-hidden" role="status">

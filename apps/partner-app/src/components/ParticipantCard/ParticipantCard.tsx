@@ -17,7 +17,7 @@ type ParticipantCardProps = {
 };
 
 /**
- * A fake video tile, same look as the PWD widget's ParticipantTile:
+ * A fake video tile, same structure as the PWD widget's ParticipantTile:
  * gradient "video" background, round avatar, name label in the bottom corner.
  * Adds a connection state chip (icon + text) for the partner view.
  */

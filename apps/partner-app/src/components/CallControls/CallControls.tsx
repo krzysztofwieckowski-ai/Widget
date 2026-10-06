@@ -13,7 +13,7 @@ type CallControlsProps = {
 };
 
 /**
- * Same control buttons as the PWD widget. Mute and Camera are visual-only toggles
+ * Same control buttons as the PWD widget (restyled). Mute and Camera are visual-only toggles
  * (aria-pressed + slashed icon + inverted style). There is no "request translator" button:
  * the translator is matched automatically as soon as the partner joins.
  */

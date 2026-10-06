@@ -1,10 +1,5 @@
 import type { Partner } from '../types';
 
-export const DEMO_CREDENTIALS = {
-  email: 'sarah@example.com',
-  password: 'Password123!',
-};
-
 export const mockPartner: Partner = {
   id: 'partner-001',
   name: 'Sarah Ahmed',
@@ -14,9 +9,15 @@ export const mockPartner: Partner = {
   status: 'AVAILABLE',
 };
 
-/** Mock login: no real authentication, just a comparison with the demo credentials. */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Mock login: any well-formed email with any non-empty password is accepted.
+ * There is no real authentication; the partner profile is always the mock partner,
+ * with the email that was typed in.
+ */
 export function authenticate(email: string, password: string): Partner | null {
-  const matches =
-    email.trim().toLowerCase() === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password;
-  return matches ? { ...mockPartner } : null;
+  const trimmedEmail = email.trim();
+  if (!EMAIL_PATTERN.test(trimmedEmail) || password.length === 0) return null;
+  return { ...mockPartner, email: trimmedEmail };
 }

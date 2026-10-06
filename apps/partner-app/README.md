@@ -15,43 +15,66 @@ npm install            # from the repository root
 npm run dev:partner    # http://localhost:3002
 ```
 
-Demo login: **sarah@example.com** / **Password123!**. The login screen also has a *Fill in demo credentials* button.
+Login: **any valid email address and any password** work. It is a mock login, and you are always signed in as the mock partner Sarah Ahmed, with the email you typed.
 
 ## Demo flow
 
-1. **Login.** Wrong credentials show an error.
-2. **Dashboard.** Shows the partner (Sarah Ahmed, Riyadh Branch), the status selector (Available / Busy / Away / Offline), incoming calls and recent calls.
-3. **Demo tools → Simulate incoming call.** A *New accessibility call* card appears (CALL-001, Riyadh Branch, Arabic). The Dashboard nav item gets a badge, and the call is announced to screen readers.
-   - *Simulate call for Jeddah Branch* shows that calls from other facilities are **not** routed to Sarah.
-   - If the status is not *Available*, the call is not routed either.
-4. **Join call.** Opens the call screen in a **lobby**: PWD User and Sarah (you) are connected, and the call is **not started yet** (*Not started*, *Waiting for all participants · 2 of 3 joined*, dashed stage). The partner status becomes *Busy*, and the navigation is hidden.
-5. **Translator joins automatically.** There is no button to press. The status goes from *Looking for an available translator…* (~2 s) to *Translator found: Ahmed Ali (Arabic / English). Connecting…* (~1.5 s).
-   **The call only starts once all three roles are present:** the timer starts, the status becomes *Connected · 3 participants*, and the start is announced to screen readers. This matches the widget's one-call rule.
+1. **Login.** An empty field or an invalid email shows an error.
+2. **Dashboard.** Shows the partner (Sarah Ahmed, Riyadh Branch), an **Offline ⟷ Available** switch (*Busy* is set automatically during a call), incoming calls and recent calls.
+3. **Demo tools → Simulate incoming call.** A *New accessibility call* card appears (CALL-001, Riyadh Branch). The partner is alerted in several ways:
+   - a **ringtone**, generated with Web Audio, with no audio file. It stops when the partner joins, clicks *Silence ringtone*, or after 30 s.
+   - a badge on *Dashboard* in the navigation
+   - the tab title changes to *(1) Incoming call · …*
+   - a screen-reader announcement
+   - when the tab is in the background, a **system notification**. Clicking it brings the partner back to the app.
+   - **Simulate in 5 s** gives you time to switch to another tab or app, so you can hear the ringtone and see the system notification. The first click asks for notification permission.
+   - A partner only ever sees calls from their **own facility**. The simulated call always comes from Sarah's branch, and the dashboard and history only list calls from that branch.
+   - If the status is not *Available*, the call is not routed to Sarah.
+   - **Decline** rejects the call. It stops the ringtone and the notification, and logs the call in the history as *Declined*. No banner is shown; a screen reader announces the decline.
+4. **Join call.** Opens the call screen in a **lobby**. A status panel in the **middle of the camera view** shows what is happening. At the start: PWD User and Sarah (you) are connected, and the call is **not started yet** (*Not started*, *Waiting for all participants · 2 of 3 joined*, dashed stage). The partner status becomes *Busy*, and the navigation is hidden.
+5. **Translator joins automatically.** There is no button to press. The status goes from *Looking for an available translator…* (~2 s) to *Translator found: Ahmed Ali. Connecting…* (~1.5 s).
+   **The call only starts once all three roles are present:** the panel briefly confirms *All participants joined. The call has started.*, the timer starts, the status becomes *Connected · 3 participants*, and the start is announced to screen readers. This matches the widget's one-call rule.
 6. **Mute / Camera.** These are visual-only toggles, available in the lobby and during the call.
-7. **End call.** A confirmation dialog opens (*End this call?* with Cancel / End call). After you confirm, you go back to the Dashboard with an *Available* status and a *Call ended* notice.
+7. **End call.** A confirmation dialog opens (*End this call?* with Cancel / End call). After you confirm, you go back to the Dashboard with an *Available* status. No "call ended" message is shown, and the call appears in *Recent calls* and *History*.
    In the lobby, the red button is **Leave** (*Leave before the call starts?*). Leaving cancels the call, and it is saved in the history as *Cancelled*.
-8. **History.** The call is listed with date, facility, language, duration, translator yes/no and *Completed* or *Cancelled*.
+8. **History.** Each call shows date, facility, duration, call ID and its result: *Completed*, *Cancelled* or *Declined*. There is no translator yes/no field, because a call only runs with a translator. The call language is not stored in the history.
 
 Switch **EN | العربية** at any point, including during a call. The whole layout switches to RTL, and the current screen and call state are kept. The language choice is saved in `localStorage`.
 
-## Visual consistency with the PWD widget
+## Incoming call alerts: what works when
 
-The partner app reuses the widget's design language:
+| Situation | What the partner gets |
+| --- | --- |
+| Partner App open and visible | Card, ringtone, nav badge, screen-reader announcement |
+| Partner App open in a **background tab** or minimised | Ringtone (audio was unlocked by the earlier login click), system notification (if permission was granted), `(1)` in the tab title |
+| Partner App **closed** | Nothing. This would need Web Push (service worker + a push server) or a desktop/mobile app. That is out of scope for this frontend-only POC. |
 
-- the same colour tokens, radii and font stack
-- the same icon set (copied from the widget, plus a few partner-only icons)
-- the green header with an orange bottom border
-- the same buttons
-- the same dark call screen: gradient participant tiles, a shared "room" frame, name labels in the corner, round control buttons and a red *End call* button
+Browsers only allow sound after the user has interacted with the page. The login click unlocks audio for the whole session.
 
-Colour roles match the widget: the support side (partner) is green, the translator is orange, and the customer (PWD user) is slate.
+## Visual design
+
+The look is inspired by [Takamol Holding](https://takamolholding.com/en). It is a dark theme with:
+
+- a near-black navy background (`#070713`) with soft violet and cyan glows
+- dark cards (`#14141a`, `#313131` border, 24 px radius)
+- the violet brand colour `#5a5cff` and a violet → indigo → cyan gradient
+- a floating glass navigation bar
+- pill-shaped buttons and large bold headings
+
+The login screen uses the gradient "hero" with a glass card.
+The call screen colours each role from the same palette: PWD user indigo-slate, partner violet, translator cyan-blue.
+
+Contrast is kept at 4.5:1 or higher for all text. Violet text and links use the lighter `#9d9eff`. The saturated `#5a5cff` is only used for fills and borders.
+The focus ring is cyan (`#15d3ff`).
+
+The PWD widget (`apps/accessibility-widget`) keeps its own green theme. The structure of the call screen is still the same on both sides: participant tiles, the shared stage and the round control buttons.
 
 ## Structure
 
 ```
 src/
 ├── App.tsx                 # flow state: session, page, incoming/active call, history, language
-├── components/             # Header, LanguageSwitcher, StatusSelector, StatusBadge, IncomingCall,
+├── components/             # Header, LanguageSwitcher, StatusSwitch, StatusBadge, OutcomeBadge, IncomingCall,
 │                           # ParticipantCard, CallControls, ConfirmDialog, Notice, icons
 ├── pages/                  # Login, Dashboard, Call, History, Profile
 ├── mock/                   # partner (+ mock login), calls (+ routing), translator (+ delays), facilities

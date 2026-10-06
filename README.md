@@ -5,14 +5,15 @@ Proof of concept of a **universal** accessibility assistance widget that any web
 **support agent and a translator together**. The widget contains no site-specific wording, so it is not tied to banking.
 There is no login, no backend and no real video. Everything is simulated in the frontend.
 
-The repository contains two **independent** React + TypeScript (Vite) apps:
+The repository contains three **independent** React + TypeScript (Vite) apps:
 
 | App | Location | URL |
 | --- | --- | --- |
 | Mock bank website in Arabic, RTL ("بنك الروضة", fictional) | `apps/bank-website` | http://localhost:3000 |
 | Accessibility assistance widget | `apps/accessibility-widget` | http://localhost:3001 |
+| Partner App: the employee's side of the call (EN / Arabic RTL) | `apps/partner-app` | http://localhost:3002 |
 
-The bank website loads the widget in an `<iframe>` from `http://localhost:3001`. The two apps share no code.
+The bank website loads the widget in an `<iframe>` from `http://localhost:3001`. The Partner App is standalone and simulates incoming calls itself (see [apps/partner-app/README.md](apps/partner-app/README.md)). The apps share no code.
 
 ## Requirements
 
@@ -23,7 +24,7 @@ The bank website loads the widget in an `<iframe>` from `http://localhost:3001`.
 
 ```bash
 npm install     # installs dependencies for both apps (npm workspaces)
-npm run dev     # starts both apps together
+npm run dev     # starts all three apps together
 ```
 
 Open http://localhost:3000. The round green accessibility button is in the bottom-right corner.
@@ -32,11 +33,12 @@ Open http://localhost:3000. The round green accessibility button is in the botto
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Start both apps at the same time |
+| `npm run dev` | Start all three apps at the same time |
 | `npm run dev:bank` | Start only the bank website (port 3000) |
 | `npm run dev:widget` | Start only the widget (port 3001) |
-| `npm run build` | Type-check and build both apps |
-| `npm run typecheck` | Type-check both apps |
+| `npm run dev:partner` | Start only the Partner App (port 3002) |
+| `npm run build` | Type-check and build all apps |
+| `npm run typecheck` | Type-check all apps |
 
 Both ports are fixed (`strictPort`). If a port is busy, Vite stops with an error instead of picking another port.
 
@@ -44,6 +46,7 @@ Both ports are fixed (`strictPort`). If a port is busy, Vite stops with an error
 
 ```
 closed → welcome → request → waiting (~2 s) → video call → call ended → closed
+                                       ↘ unavailable → closed
 ```
 
 1. Click the accessibility launcher. The panel opens in **Arabic (RTL)** by default.
@@ -53,9 +56,20 @@ closed → welcome → request → waiting (~2 s) → video call → call ended 
 5. **Video call**: one shared call with three tiles (support agent, translator, you). Mute and Stop video are visual toggles. **End call** ends the whole call.
 6. **Call ended**: the customer can rate the call with 1–5 stars (click, or use the arrow keys). The rating is only kept in the widget state and not sent anywhere. *إغلاق* closes the panel and returns to the launcher. The next time it opens, it starts at the welcome screen.
 
-Switching to **English** at any point changes the language and direction without restarting the flow.
+The small language button in the green header shows the other language ("English" or "العربية"). Switching at any point changes the language and direction without restarting the flow.
 Closing the panel mid-flow (the × button or `Esc`) keeps your place, so reopening continues where you left off.
 On desktop and tablet, the **Enlarge window** button in the header (next to ×) makes the widget fill almost the whole browser window. In the call this gives much bigger video tiles. Pressing it again restores the compact size. Resizing never interrupts the flow. On phones the panel is already full screen, so the button is hidden.
+
+### Scenario: no support agent or translator available
+
+Open **http://localhost:3000/?scenario=unavailable** (or http://localhost:3001/?scenario=unavailable for the widget alone).
+The bank page passes the parameter on to the iframe. After the same ~2 s wait, instead of the call the widget shows
+*"Assistance is not available right now"* / *"المساعدة غير متاحة حالياً"* with the note that no call was started.
+
+- **Try again** starts the waiting again. In this scenario it fails again, to keep the demo predictable.
+- **Close** returns to the launcher. The next time the widget opens, it starts at the welcome screen.
+- Following the one-call rule, there is no partial call: if either person is missing, nobody is connected.
+- Without the parameter, help is always available. This is a frontend simulation only, not a real availability check.
 
 ## How the iframe integration works
 
@@ -109,6 +123,7 @@ accessibility-assistance-poc/
             ├── components/         # Launcher, WidgetPanel, LanguageSwitcher, Screen,
             │                       # ParticipantTile, CallControls, buttons, icons
             └── screens/            # one component per flow step
+    └── partner-app/                # Partner / employee portal (port 3002), see its README
 ```
 
 ## Accessibility notes
@@ -116,7 +131,7 @@ accessibility-assistance-poc/
 - Semantic HTML (dialog, headings, lists, `dl`), and every control is a real `<button>`.
 - Focus moves to the new screen heading on every step and returns to the launcher on close. `Esc` closes the panel.
 - Visible focus rings, at least 44 px touch targets, and a contrast ratio of at least 4.5:1 for text.
-- Selected or pressed states are never shown by colour alone: the language uses fill + bold + underline + `aria-pressed`, and Mute/Stop video use a slashed icon + inverted style + `aria-pressed`.
+- Selected or pressed states are never shown by colour alone: Mute/Stop video use a slashed icon + inverted style + `aria-pressed`.
 - `prefers-reduced-motion` turns off the panel animation and the spinning indicator.
 - The launcher's accessible name is always "Accessibility assistance".
 - This is an assistance service, not an accessibility toolbar. There are deliberately no font, contrast or similar controls.

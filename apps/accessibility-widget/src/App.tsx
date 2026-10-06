@@ -9,8 +9,11 @@ import AssistanceRequestScreen from './screens/AssistanceRequestScreen';
 import WaitingScreen from './screens/WaitingScreen';
 import VideoCallScreen from './screens/VideoCallScreen';
 import CallEndedScreen from './screens/CallEndedScreen';
+import UnavailableScreen from './screens/UnavailableScreen';
+import { isAssistanceAvailable } from './demoScenario';
 
-// Simulated time to "prepare" the support agent and translator. No real availability check.
+// Simulated time to "prepare" the support agent and translator. No real availability check:
+// the result comes from the demo scenario (see demoScenario.ts).
 const WAITING_TIME_MS = 2000;
 
 // On phones the open panel is already full screen, so the enlarge button is not shown.
@@ -18,6 +21,7 @@ const CAN_EXPAND = window.screen.width > 480;
 
 /**
  * Flow: closed → welcome → request → waiting → call → ended → closed
+ *                                              ↘ unavailable (no agent + translator) → closed
  *
  * The panel stays mounted while closed (just hidden), so closing and reopening
  * mid-flow keeps the customer where they were. Language is separate state,
@@ -57,10 +61,14 @@ export default function App() {
     }
   }, [isOpen, step]);
 
-  // Simulated waiting: after ~2 seconds the shared call opens automatically.
+  // Simulated waiting: after ~2 seconds either the shared call opens automatically,
+  // or (demo scenario) nobody is available and no call is started.
   useEffect(() => {
     if (step !== 'waiting') return;
-    const timeoutId = window.setTimeout(() => setStep('call'), WAITING_TIME_MS);
+    const timeoutId = window.setTimeout(
+      () => setStep(isAssistanceAvailable ? 'call' : 'unavailable'),
+      WAITING_TIME_MS,
+    );
     return () => window.clearTimeout(timeoutId);
   }, [step]);
 
@@ -71,8 +79,8 @@ export default function App() {
   function closeWidget() {
     shouldFocusLauncher.current = true;
     setIsOpen(false);
-    // A finished call starts fresh next time.
-    if (step === 'ended') setStep('welcome');
+    // A finished call or a failed request starts fresh next time.
+    if (step === 'ended' || step === 'unavailable') setStep('welcome');
   }
 
   function renderStep() {
@@ -93,6 +101,8 @@ export default function App() {
         return <VideoCallScreen t={t} onEndCall={() => setStep('ended')} />;
       case 'ended':
         return <CallEndedScreen t={t} onClose={closeWidget} />;
+      case 'unavailable':
+        return <UnavailableScreen t={t} onTryAgain={() => setStep('waiting')} onClose={closeWidget} />;
     }
   }
 

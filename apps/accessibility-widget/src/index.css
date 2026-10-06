@@ -170,29 +170,17 @@ button {
 .panel-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-block: 10px;
-  padding-inline: 16px 8px;
+  gap: 4px;
+  padding-block: 8px;
+  padding-inline: 16px 6px;
   background: var(--green);
   color: #fff;
   border-bottom: 3px solid var(--orange);
 }
 
-.panel-header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.16);
-}
-
-.panel-header-icon .icon { width: 22px; height: 22px; }
-
 .panel-title {
   flex: 1;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
@@ -213,14 +201,6 @@ button {
 
 .icon-button:hover { background: rgb(255 255 255 / 0.16); }
 
-.panel-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  background: var(--surface-muted);
-  border-bottom: 1px solid var(--border);
-}
-
 .panel-body {
   flex: 1;
   min-height: 0;
@@ -229,39 +209,24 @@ button {
   flex-direction: column;
 }
 
-/* =========================================================
-   Language switcher
-   Active option: filled + bold + underline (not colour alone).
-   ========================================================= */
-.language-switcher {
-  display: flex;
-  padding: 3px;
-  gap: 3px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-}
-
-.language-option {
-  min-width: 76px;
+/* Compact language toggle in the header (shows the other language). */
+.language-toggle {
   min-height: 36px;
-  padding: 4px 12px;
-  border: 0;
+  padding: 2px 12px;
+  margin-inline-end: 4px;
+  border: 1.5px solid rgb(255 255 255 / 0.75);
   border-radius: 999px;
   background: transparent;
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-.language-option:hover { background: var(--green-light); }
-
-.language-option[aria-pressed='true'] {
-  background: var(--green);
   color: #fff;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
+
+.language-toggle:hover { background: rgb(255 255 255 / 0.16); }
+
+/* Arabic script reads smaller at the same size. */
+.language-toggle:lang(ar) { font-size: 0.95rem; }
 
 /* =========================================================
    Screen layout (shared by every flow step except the call)
@@ -290,6 +255,11 @@ button {
   border-radius: 50%;
   background: var(--green-light);
   color: var(--green);
+}
+
+.screen-icon--warning {
+  background: var(--orange-light);
+  color: #9a4a00;
 }
 
 .screen-icon .icon { width: 34px; height: 34px; }

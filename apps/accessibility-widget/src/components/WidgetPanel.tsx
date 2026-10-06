@@ -2,7 +2,7 @@ import type { KeyboardEvent, ReactNode, Ref } from 'react';
 import type { Language } from '../types';
 import type { Translation } from '../i18n';
 import LanguageSwitcher from './LanguageSwitcher';
-import { AccessibilityIcon, CloseIcon, CollapseIcon, ExpandIcon } from './icons';
+import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
 
 type WidgetPanelProps = {
   t: Translation;
@@ -17,7 +17,7 @@ type WidgetPanelProps = {
   ref?: Ref<HTMLDivElement>;
 };
 
-/** Panel frame shared by every step: header, language switcher, enlarge and close buttons. */
+/** Panel frame shared by every step: header with title, language toggle, enlarge and close buttons. */
 export default function WidgetPanel({
   t,
   language,
@@ -45,12 +45,10 @@ export default function WidgetPanel({
       onKeyDown={handleKeyDown}
     >
       <header className="panel-header">
-        <span className="panel-header-icon">
-          <AccessibilityIcon />
-        </span>
         <h1 id="panel-title" className="panel-title">
           {t.widgetTitle}
         </h1>
+        <LanguageSwitcher language={language} onChange={onLanguageChange} tooltip={t.changeLanguage} />
         {onToggleExpand && (
           <button
             type="button"
@@ -72,10 +70,6 @@ export default function WidgetPanel({
           <CloseIcon />
         </button>
       </header>
-
-      <div className="panel-toolbar">
-        <LanguageSwitcher language={language} onChange={onLanguageChange} groupLabel={t.languageGroup} />
-      </div>
 
       <main className="panel-body">{children}</main>
     </div>

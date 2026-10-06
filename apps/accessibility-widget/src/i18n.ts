@@ -5,7 +5,7 @@ const en = {
   closeWidget: 'Close assistance widget',
   expandWidget: 'Enlarge window',
   restoreWidget: 'Reduce window',
-  languageGroup: 'Language',
+  changeLanguage: 'Change language',
   back: 'Back',
 
   welcomeTitle: 'Do you need assistance?',
@@ -27,6 +27,12 @@ const en = {
   waitingTitle: 'Preparing your assistance',
   waitingDescription: 'Please wait while we prepare a support agent and a translator to assist you.',
   cancelRequest: 'Cancel request',
+
+  unavailableTitle: 'Assistance is not available right now',
+  unavailableDescription:
+    'We could not find an available support agent and translator for you at the moment. Please try again in a few minutes.',
+  unavailableNote: 'No call was started.',
+  tryAgain: 'Try again',
 
   callTitle: 'Assistance call',
   callConnected: 'Connected',
@@ -55,7 +61,7 @@ const ar: Translation = {
   closeWidget: 'إغلاق نافذة المساعدة',
   expandWidget: 'تكبير النافذة',
   restoreWidget: 'تصغير النافذة',
-  languageGroup: 'اللغة',
+  changeLanguage: 'تغيير اللغة',
   back: 'رجوع',
 
   welcomeTitle: 'هل تحتاج إلى مساعدة؟',
@@ -77,6 +83,12 @@ const ar: Translation = {
   waitingTitle: 'جاري تجهيز المساعدة',
   waitingDescription: 'يرجى الانتظار بينما نجهز موظف الدعم والمترجم لمساعدتك.',
   cancelRequest: 'إلغاء الطلب',
+
+  unavailableTitle: 'المساعدة غير متاحة حالياً',
+  unavailableDescription:
+    'لم نتمكن من إيجاد موظف دعم ومترجم متاحين لك في الوقت الحالي. يرجى المحاولة مرة أخرى بعد بضع دقائق.',
+  unavailableNote: 'لم تبدأ أي مكالمة.',
+  tryAgain: 'حاول مرة أخرى',
 
   callTitle: 'مكالمة المساعدة',
   callConnected: 'متصل',

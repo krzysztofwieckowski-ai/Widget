@@ -27,7 +27,7 @@ npm install     # installs dependencies for both apps (npm workspaces)
 npm run dev     # starts all three apps together
 ```
 
-Open http://localhost:3000. The round green accessibility button is in the bottom-right corner.
+Open http://localhost:3000. The round accessibility button (violet-to-cyan gradient) is in the bottom-right corner.
 
 ## Scripts (run from the repository root)
 
@@ -56,7 +56,7 @@ closed → welcome → request → waiting (~2 s) → video call → call ended 
 5. **Video call**: one shared call with three tiles (support agent, translator, you). Mute and Stop video are visual toggles. **End call** ends the whole call.
 6. **Call ended**: the customer can rate the call with 1–5 stars (click, or use the arrow keys). The rating is only kept in the widget state and not sent anywhere. *إغلاق* closes the panel and returns to the launcher. The next time it opens, it starts at the welcome screen.
 
-The small language button in the green header shows the other language ("English" or "العربية"). Switching at any point changes the language and direction without restarting the flow.
+The small language button in the widget header shows the other language ("English" or "العربية"). Switching at any point changes the language and direction without restarting the flow.
 Closing the panel mid-flow (the × button or `Esc`) keeps your place, so reopening continues where you left off.
 On desktop and tablet, the **Enlarge window** button in the header (next to ×) makes the widget fill almost the whole browser window. In the call this gives much bigger video tiles. Pressing it again restores the compact size. Resizing never interrupts the flow. On phones the panel is already full screen, so the button is hidden.
 
@@ -125,6 +125,19 @@ accessibility-assistance-poc/
             └── screens/            # one component per flow step
     └── partner-app/                # Partner / employee portal (port 3002), see its README
 ```
+
+## Visual design
+
+The widget and the Partner App share one dark theme, inspired by [Takamol Holding](https://takamolholding.com/en):
+
+- a navy background with violet and cyan glows
+- dark cards
+- the violet brand colour `#5a5cff`
+- a violet → indigo → cyan gradient (launcher, icons, header line)
+- pill buttons and a cyan focus ring
+
+The call uses the same role colours on both sides: support agent/consultant violet, translator cyan-blue, PWD user indigo-slate.
+The widget document itself stays transparent (`color-scheme: light` on the page, `dark` only on the panel), so the round launcher has no square corners on the light host page.
 
 ## Accessibility notes
 

@@ -89,7 +89,7 @@ The call screen colours each role from the same palette: PWD user indigo-slate, 
 Contrast is kept at 4.5:1 or higher for all text. Violet text and links use the lighter `#9d9eff`. The saturated `#5a5cff` is only used for fills and borders.
 The focus ring is cyan (`#15d3ff`).
 
-The PWD widget (`apps/accessibility-widget`) keeps its own green theme. The structure of the call screen is still the same on both sides: participant tiles, the shared stage and the round control buttons.
+The PWD widget (`apps/accessibility-widget`) uses the same theme and the same role colours, so both sides of the call look like one product.
 
 ## Structure
 

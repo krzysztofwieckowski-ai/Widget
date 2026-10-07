@@ -15,6 +15,7 @@ type CallPageProps = {
   t: Translation;
   language: Language;
   partner: Partner;
+  companyName: string;
   call: IncomingCall;
   onEndCall: (result: CallResult) => void;
 };
@@ -31,7 +32,7 @@ const STARTED_BANNER_MS = 2500;
  * automatically (searching → connecting → connected). The call only starts — timer running,
  * "Connected" — once all three roles are present, matching the widget's one-call rule.
  */
-export default function CallPage({ t, language, partner, call, onEndCall }: CallPageProps) {
+export default function CallPage({ t, language, partner, companyName, call, onEndCall }: CallPageProps) {
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -86,7 +87,7 @@ export default function CallPage({ t, language, partner, call, onEndCall }: Call
             <h1 id="call-title" className="call-title" tabIndex={-1} data-page-heading>
               {t.callTitle}
             </h1>
-            <p className="call-facility">{t.facilities[call.facilityId]}</p>
+            <p className="call-company">{companyName}</p>
             <p className="call-meta">
               {isStarted ? (
                 <>

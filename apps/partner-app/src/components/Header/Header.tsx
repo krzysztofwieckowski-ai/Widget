@@ -1,40 +1,43 @@
-import type { Language, Page } from '../../types';
+import type { ReactNode } from 'react';
+import type { Language } from '../../types';
 import type { Translation } from '../../i18n';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
-import { AccessibilityIcon, DashboardIcon, HistoryIcon, LogoutIcon, UserIcon } from '../icons';
+import { AccessibilityIcon, LogoutIcon } from '../icons';
 
-type HeaderProps = {
+export type NavItem<K extends string> = {
+  key: K;
+  label: string;
+  icon: ReactNode;
+  /** Small count badge; `badgeLabel` is what screen readers hear instead of the number. */
+  badge?: { count: number; badgeLabel: string };
+};
+
+type HeaderProps<K extends string> = {
   t: Translation;
   language: Language;
   onLanguageChange: (language: Language) => void;
-  page: Page;
-  onNavigate: (page: Page) => void;
+  /** "Partner Portal" or "Admin Panel". */
+  subtitle: string;
+  navItems: NavItem<K>[];
+  currentKey: K | null;
+  onNavigate: (key: K) => void;
   onLogout: () => void;
-  hasIncomingCall: boolean;
+  /** During a call navigation and logout are hidden so the consultant cannot leave the call by accident. */
+  inCall?: boolean;
 };
 
-/**
- * Green header with the orange bottom border, like the PWD widget header.
- * During a call the navigation and logout are hidden so the partner cannot leave the call by accident;
- * the language switcher always stays available.
- */
-export default function Header({
+/** Floating glass navigation bar shared by the Partner Portal and the Admin Panel. */
+export default function Header<K extends string>({
   t,
   language,
   onLanguageChange,
-  page,
+  subtitle,
+  navItems,
+  currentKey,
   onNavigate,
   onLogout,
-  hasIncomingCall,
-}: HeaderProps) {
-  const inCall = page === 'call';
-
-  const navItems = [
-    { page: 'dashboard' as const, label: t.navDashboard, icon: <DashboardIcon /> },
-    { page: 'history' as const, label: t.navHistory, icon: <HistoryIcon /> },
-    { page: 'profile' as const, label: t.navProfile, icon: <UserIcon /> },
-  ];
-
+  inCall = false,
+}: HeaderProps<K>) {
   return (
     <header className="app-header">
       <div className="app-header-inner">
@@ -44,7 +47,7 @@ export default function Header({
           </span>
           <span className="brand-text">
             <span className="brand-title">{t.appName}</span>
-            <span className="brand-subtitle">{t.portalName}</span>
+            <span className="brand-subtitle">{subtitle}</span>
           </span>
         </div>
 
@@ -57,19 +60,19 @@ export default function Header({
           <nav className="main-nav" aria-label={t.mainNavigation}>
             <ul className="main-nav-list">
               {navItems.map((item) => (
-                <li key={item.page}>
+                <li key={item.key}>
                   <button
                     type="button"
                     className="main-nav-link"
-                    aria-current={page === item.page ? 'page' : undefined}
-                    onClick={() => onNavigate(item.page)}
+                    aria-current={currentKey === item.key ? 'page' : undefined}
+                    onClick={() => onNavigate(item.key)}
                   >
                     {item.icon}
                     {item.label}
-                    {item.page === 'dashboard' && hasIncomingCall && (
+                    {item.badge && item.badge.count > 0 && (
                       <span className="nav-badge">
-                        <span aria-hidden="true">1</span>
-                        <span className="visually-hidden">{t.incomingCallBadge}</span>
+                        <span aria-hidden="true">{item.badge.count}</span>
+                        <span className="visually-hidden">{item.badge.badgeLabel}</span>
                       </span>
                     )}
                   </button>

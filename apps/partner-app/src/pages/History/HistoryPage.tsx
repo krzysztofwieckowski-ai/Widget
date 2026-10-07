@@ -25,10 +25,6 @@ export default function HistoryPage({ t, language, history }: HistoryPageProps) 
               </div>
               <dl className="details-grid">
                 <div>
-                  <dt>{t.facility}</dt>
-                  <dd>{t.facilities[call.facilityId]}</dd>
-                </div>
-                <div>
                   <dt>{t.duration}</dt>
                   <dd>
                     <span dir="ltr" className="tabular">

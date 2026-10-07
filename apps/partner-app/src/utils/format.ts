@@ -20,6 +20,18 @@ export function formatDate(isoDate: string, language: Language, withYear = true)
   }).format(new Date(isoDate));
 }
 
-export function displayName(person: { name: string; nameAr: string }, language: Language) {
-  return language === 'ar' ? person.nameAr : person.name;
+/** Arabic name when the app is in Arabic and one exists (seeded mock data); otherwise the single name. */
+export function displayName(entity: { name: string; nameAr?: string }, language: Language) {
+  return language === 'ar' && entity.nameAr ? entity.nameAr : entity.name;
+}
+
+/** Long durations for statistics, e.g. "2 h 14 min" or "8 min 32 s" (unit words come from i18n). */
+export function formatLongDuration(
+  totalSeconds: number,
+  units: { hoursMinutes: (h: number, m: number) => string; minutesSeconds: (m: number, s: number) => string },
+) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return hours > 0 ? units.hoursMinutes(hours, minutes) : units.minutesSeconds(minutes, seconds);
 }

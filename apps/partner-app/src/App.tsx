@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CallRecord, IncomingCall, Language, Page, Partner, PartnerStatus } from './types';
+import type { CallRecord, Company, Consultant, IncomingCall, Language, Page, Partner, PartnerStatus } from './types';
 import { getDirection, translations } from './i18n';
 import { createIncomingCall, getRoutingResult, initialCallHistory } from './mock/calls';
+import { createId, generateCompanyKey, initialCompanies, initialConsultants } from './mock/companies';
+import { authenticate } from './mock/partner';
+import { displayName } from './utils/format';
 import { RINGTONE_MAX_MS, startRingtone, stopRingtone, unlockAudio } from './utils/ringtone';
 import {
   isNotificationBlocked,
@@ -9,6 +12,8 @@ import {
   showIncomingCallNotification,
 } from './utils/systemNotification';
 import Header from './components/Header/Header';
+import { DashboardIcon, HistoryIcon, UserIcon } from './components/icons';
+import AdminApp from './pages/Admin/AdminApp';
 import LoginPage from './pages/Login/LoginPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import CallPage, { type CallResult } from './pages/Call/CallPage';
@@ -25,7 +30,11 @@ function getInitialLanguage(): Language {
 }
 
 /**
- * Flow: login → dashboard → (simulate) incoming call → join → lobby (translator joins automatically)
+ * Two roles share this app and its in-memory data (companies, consultants, call history):
+ * - admin ("admin" + any password): manages partner companies, their consultants and sees statistics;
+ * - consultant (any other email): the Partner Portal below.
+ *
+ * Partner Portal flow: login → dashboard → (simulate) incoming call → join → lobby (translator joins automatically)
  *       → call starts with all 3 roles → end → dashboard → history
  *
  * Everything is local React state; there is no backend and no router.
@@ -34,6 +43,9 @@ function getInitialLanguage(): Language {
 export default function App() {
   const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [partner, setPartner] = useState<Partner | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies);
+  const [consultants, setConsultants] = useState<Consultant[]>(initialConsultants);
   const [page, setPage] = useState<Page>('dashboard');
   const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
   const [activeCall, setActiveCall] = useState<IncomingCall | null>(null);
@@ -50,8 +62,8 @@ export default function App() {
   const t = translations[language];
 
   // A delayed simulated call must use the partner status and language at delivery time, not at click time.
-  const latest = useRef({ partner, t });
-  latest.current = { partner, t };
+  const latest = useRef({ partner, t, companies, language });
+  latest.current = { partner, t, companies, language };
 
   // Language and text direction apply to the whole document, so the entire layout mirrors in Arabic.
   useEffect(() => {
@@ -62,9 +74,9 @@ export default function App() {
 
   // The tab title shows a waiting call, so it is visible in the tab bar from another tab.
   useEffect(() => {
-    const baseTitle = `${t.appName} · ${t.portalName}`;
+    const baseTitle = `${t.appName} · ${isAdmin ? t.adminPanel : t.portalName}`;
     document.title = incomingCall ? `(1) ${t.tabTitleIncoming} · ${baseTitle}` : baseTitle;
-  }, [t, incomingCall]);
+  }, [t, incomingCall, isAdmin]);
 
   // Ringtone while a call is waiting; stops on join, on "Silence ringtone" or after RINGTONE_MAX_MS.
   useEffect(() => {
@@ -84,7 +96,7 @@ export default function App() {
       return;
     }
     document.querySelector<HTMLElement>('[data-page-heading]')?.focus();
-  }, [page, partner === null]);
+  }, [page, partner === null, isAdmin]);
 
   /** Polite screen-reader announcement for things that happen without a focus change. */
   function announce(message: string) {
@@ -98,11 +110,33 @@ export default function App() {
     setCallNotRouted(false);
   }
 
-  function handleLogin(loggedInPartner: Partner) {
+  /** Returns false when the login is rejected (empty password or neither "admin" nor an email). */
+  function handleLogin(login: string, password: string) {
+    const result = authenticate(login, password, consultants);
+    if (!result) return false;
+    if (result.role === 'admin') {
+      setIsAdmin(true);
+      return true;
+    }
     // The login click is a user gesture: unlock audio so later calls can ring even in a background tab.
     unlockAudio();
-    setPartner(loggedInPartner);
+    setPartner(result.partner);
     setPage('dashboard');
+    return true;
+  }
+
+  function createCompany(name: string): Company {
+    const company: Company = { id: createId('company'), name, key: generateCompanyKey(), createdAt: new Date().toISOString() };
+    setCompanies((current) => [...current, company]);
+    return company;
+  }
+
+  function assignConsultant(consultant: Omit<Consultant, 'id'>) {
+    setConsultants((current) => [...current, { ...consultant, id: createId('consultant') }]);
+  }
+
+  function removeConsultant(consultantId: string) {
+    setConsultants((current) => current.filter((c) => c.id !== consultantId));
   }
 
   function handleLogout() {
@@ -110,6 +144,7 @@ export default function App() {
     if (pendingCallTimeout.current !== null) window.clearTimeout(pendingCallTimeout.current);
     pendingCallTimeout.current = null;
     setIsCallPending(false);
+    setIsAdmin(false);
     setPartner(null);
     setIncomingCall(null);
     setEndedCall(null);
@@ -122,19 +157,20 @@ export default function App() {
   }
 
   /**
-   * Delivers a simulated PWD widget call from the partner's own facility (the only calls a partner
+   * Delivers a simulated PWD widget call for the consultant's own company (the only calls a consultant
    * ever sees): card + nav badge, ringtone, screen-reader announcement, tab title and — if this tab
    * is in the background — a system notification.
    */
   function deliverIncomingCall() {
-    const { partner: currentPartner, t: currentT } = latest.current;
+    const { partner: currentPartner, t: currentT, companies: currentCompanies, language: currentLanguage } = latest.current;
     if (!currentPartner) return;
-    const call = createIncomingCall(currentPartner.facilityId);
+    const call = createIncomingCall(currentPartner);
     const isRouted = getRoutingResult(call, currentPartner) === 'routed';
     setCallNotRouted(!isRouted);
     if (!isRouted) return;
 
-    const message = currentT.incomingAnnouncement(currentT.facilities[call.facilityId]);
+    const company = currentCompanies.find((c) => c.id === call.companyId);
+    const message = currentT.incomingAnnouncement(company ? displayName(company, currentLanguage) : '');
     setIncomingCall(call);
     setIsRinging(true);
     announce(message);
@@ -181,7 +217,8 @@ export default function App() {
     const record: CallRecord = {
       callId: incomingCall.callId,
       endedAt: new Date().toISOString(),
-      facilityId: incomingCall.facilityId,
+      companyId: incomingCall.companyId,
+      consultantId: partner?.id ?? '',
       durationSeconds: 0,
       outcome: 'DECLINED',
     };
@@ -197,7 +234,8 @@ export default function App() {
     const record: CallRecord = {
       callId: activeCall.callId,
       endedAt: new Date().toISOString(),
-      facilityId: activeCall.facilityId,
+      companyId: activeCall.companyId,
+      consultantId: partner?.id ?? '',
       durationSeconds,
       outcome: started ? 'COMPLETED' : 'CANCELLED',
     };
@@ -210,24 +248,34 @@ export default function App() {
   }
 
   function renderPage(currentPartner: Partner) {
-    // A partner only ever sees calls from their own facility.
-    const ownFacilityHistory = history.filter((call) => call.facilityId === currentPartner.facilityId);
+    // A consultant only ever sees the calls they handled (all for their own company).
+    const ownHistory = history.filter((call) => call.consultantId === currentPartner.id);
+    const company = companies.find((c) => c.id === currentPartner.companyId);
+    const companyName = company ? displayName(company, language) : '';
 
     switch (page) {
       case 'call':
         return activeCall ? (
-          <CallPage t={t} language={language} partner={currentPartner} call={activeCall} onEndCall={endCall} />
+          <CallPage
+            t={t}
+            language={language}
+            partner={currentPartner}
+            companyName={companyName}
+            call={activeCall}
+            onEndCall={endCall}
+          />
         ) : null;
       case 'history':
-        return <HistoryPage t={t} language={language} history={ownFacilityHistory} />;
+        return <HistoryPage t={t} language={language} history={ownHistory} />;
       case 'profile':
-        return <ProfilePage t={t} language={language} partner={currentPartner} />;
+        return <ProfilePage t={t} language={language} partner={currentPartner} companyName={companyName} />;
       case 'dashboard':
         return (
           <DashboardPage
             t={t}
             language={language}
             partner={currentPartner}
+            companyName={companyName}
             onStatusChange={handleStatusChange}
             incomingCall={incomingCall}
             onJoinCall={joinCall}
@@ -240,7 +288,7 @@ export default function App() {
             onSilenceRingtone={() => setIsRinging(false)}
             notificationsBlocked={isNotificationBlocked()}
             callNotRouted={callNotRouted}
-            history={ownFacilityHistory}
+            history={ownHistory}
             endedCall={endedCall}
             onDismissEndedCall={() => setEndedCall(null)}
             onNavigate={navigate}
@@ -251,16 +299,41 @@ export default function App() {
 
   return (
     <>
-      {partner ? (
+      {isAdmin ? (
+        <AdminApp
+          t={t}
+          language={language}
+          onLanguageChange={setLanguage}
+          companies={companies}
+          consultants={consultants}
+          calls={history}
+          onCreateCompany={createCompany}
+          onAssignConsultant={assignConsultant}
+          onRemoveConsultant={removeConsultant}
+          onLogout={handleLogout}
+          onAnnounce={announce}
+        />
+      ) : partner ? (
         <div className="app">
           <Header
             t={t}
             language={language}
             onLanguageChange={setLanguage}
-            page={page}
+            subtitle={t.portalName}
+            navItems={[
+              {
+                key: 'dashboard' as const,
+                label: t.navDashboard,
+                icon: <DashboardIcon />,
+                badge: { count: incomingCall ? 1 : 0, badgeLabel: t.incomingCallBadge },
+              },
+              { key: 'history' as const, label: t.navHistory, icon: <HistoryIcon /> },
+              { key: 'profile' as const, label: t.navProfile, icon: <UserIcon /> },
+            ]}
+            currentKey={page === 'call' ? null : page}
             onNavigate={navigate}
             onLogout={handleLogout}
-            hasIncomingCall={incomingCall !== null}
+            inCall={page === 'call'}
           />
           <main className={`app-main${page === 'call' ? ' app-main--call' : ''}`}>{renderPage(partner)}</main>
         </div>

@@ -11,7 +11,7 @@ The repository contains three **independent** React + TypeScript (Vite) apps:
 | --- | --- | --- |
 | Mock bank website in Arabic, RTL ("بنك الروضة", fictional) | `apps/bank-website` | http://localhost:3000 |
 | Accessibility assistance widget | `apps/accessibility-widget` | http://localhost:3001 |
-| Partner App: the employee's side of the call (EN / Arabic RTL) | `apps/partner-app` | http://localhost:3002 |
+| Partner App: the consultant's side of the call, plus an Admin Panel (EN / Arabic RTL) | `apps/partner-app` | http://localhost:3002 |
 
 The bank website loads the widget in an `<iframe>` from `http://localhost:3001`. The Partner App is standalone and simulates incoming calls itself (see [apps/partner-app/README.md](apps/partner-app/README.md)). The apps share no code.
 

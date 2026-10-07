@@ -11,6 +11,7 @@ type DashboardPageProps = {
   t: Translation;
   language: Language;
   partner: Partner;
+  companyName: string;
   onStatusChange: (status: PartnerStatus) => void;
   incomingCall: IncomingCallData | null;
   onJoinCall: () => void;
@@ -37,6 +38,7 @@ export default function DashboardPage({
   t,
   language,
   partner,
+  companyName,
   onStatusChange,
   incomingCall,
   onJoinCall,
@@ -83,7 +85,7 @@ export default function DashboardPage({
               </h2>
               <p className="muted with-icon">
                 <BuildingIcon />
-                {t.facilities[partner.facilityId]}
+                {companyName}
               </p>
             </div>
           </div>
@@ -99,6 +101,7 @@ export default function DashboardPage({
             <IncomingCall
               t={t}
               call={incomingCall}
+              companyName={companyName}
               onJoin={onJoinCall}
               onDecline={onDeclineCall}
               isRinging={isRinging}
@@ -153,7 +156,6 @@ export default function DashboardPage({
               <thead>
                 <tr>
                   <th scope="col">{t.date}</th>
-                  <th scope="col">{t.facility}</th>
                   <th scope="col">{t.outcomeLabel}</th>
                   <th scope="col">{t.duration}</th>
                 </tr>
@@ -162,7 +164,6 @@ export default function DashboardPage({
                 {recentCalls.map((call) => (
                   <tr key={call.callId}>
                     <td>{formatDate(call.endedAt, language, false)}</td>
-                    <td>{t.facilityShort[call.facilityId]}</td>
                     <td>
                       <OutcomeBadge t={t} outcome={call.outcome} />
                     </td>

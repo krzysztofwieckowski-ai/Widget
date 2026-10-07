@@ -15,20 +15,28 @@ npm install            # from the repository root
 npm run dev:partner    # http://localhost:3002
 ```
 
-Login: **any valid email address and any password** work. It is a mock login, and you are always signed in as the mock partner Sarah Ahmed, with the email you typed.
+The app has two roles. It is a mock login: any non-empty password works.
+
+| Login | Role |
+| --- | --- |
+| `admin` | **Admin Panel**: partner companies, consultants, statistics |
+| an email of a consultant (e.g. `sarah@example.com`, `omar@example.com`, `layla@example.com`, or one the admin added) | **Partner Portal**, as that consultant (of their company) |
+| any other valid email | **Partner Portal**, as the demo consultant Sarah Ahmed (Al Rawdah Bank) |
+
+All data (companies, consultants, call history) is shared in memory between the two roles for the whole browser session. It resets when the page is reloaded.
 
 ## Demo flow
 
 1. **Login.** An empty field or an invalid email shows an error.
-2. **Dashboard.** Shows the partner (Sarah Ahmed, Riyadh Branch), an **Offline ⟷ Available** switch (*Busy* is set automatically during a call), incoming calls and recent calls.
-3. **Demo tools → Simulate incoming call.** A *New accessibility call* card appears (CALL-001, Riyadh Branch). The partner is alerted in several ways:
+2. **Dashboard.** Shows the consultant (Sarah Ahmed, Al Rawdah Bank), an **Offline ⟷ Available** switch (*Busy* is set automatically during a call), incoming calls and recent calls.
+3. **Demo tools → Simulate incoming call.** A *New accessibility call* card appears (CALL-001, Al Rawdah Bank). The partner is alerted in several ways:
    - a **ringtone**, generated with Web Audio, with no audio file. It stops when the partner joins, clicks *Silence ringtone*, or after 30 s.
    - a badge on *Dashboard* in the navigation
    - the tab title changes to *(1) Incoming call · …*
    - a screen-reader announcement
    - when the tab is in the background, a **system notification**. Clicking it brings the partner back to the app.
    - **Simulate in 5 s** gives you time to switch to another tab or app, so you can hear the ringtone and see the system notification. The first click asks for notification permission.
-   - A partner only ever sees calls from their **own facility**. The simulated call always comes from Sarah's branch, and the dashboard and history only list calls from that branch.
+   - A consultant only ever receives calls for their **own company**; there are no branches. The simulated call always comes from the consultant's company widget, and the dashboard and history only list the calls this consultant handled.
    - If the status is not *Available*, the call is not routed to Sarah.
    - **Decline** rejects the call. It stops the ringtone and the notification, and logs the call in the history as *Declined*. No banner is shown; a screen reader announces the decline.
 4. **Join call.** Opens the call screen in a **lobby**. A status panel in the **middle of the camera view** shows what is happening. At the start: PWD User and Sarah (you) are connected, and the call is **not started yet** (*Not started*, *Waiting for all participants · 2 of 3 joined*, dashed stage). The partner status becomes *Busy*, and the navigation is hidden.
@@ -37,9 +45,23 @@ Login: **any valid email address and any password** work. It is a mock login, an
 6. **Mute / Camera.** These are visual-only toggles, available in the lobby and during the call.
 7. **End call.** A confirmation dialog opens (*End this call?* with Cancel / End call). After you confirm, you go back to the Dashboard with an *Available* status. No "call ended" message is shown, and the call appears in *Recent calls* and *History*.
    In the lobby, the red button is **Leave** (*Leave before the call starts?*). Leaving cancels the call, and it is saved in the history as *Cancelled*.
-8. **History.** Each call shows date, facility, duration, call ID and its result: *Completed*, *Cancelled* or *Declined*. There is no translator yes/no field, because a call only runs with a translator. The call language is not stored in the history.
+8. **History.** Each call shows date, duration, call ID and its result: *Completed*, *Cancelled* or *Declined*. There is no translator yes/no field, because a call only runs with a translator. The call language is not stored in the history.
 
 Switch **EN | العربية** at any point, including during a call. The whole layout switches to RTL, and the current screen and call state are kept. The language choice is saved in `localStorage`.
+
+## Admin Panel
+
+Sign in with `admin` and any password.
+
+- **Companies.** One table: company, number of consultants, completed calls. Under it, a one-line form adds a company: type the name and press *Add company*. Its key (`twc_live_…`) is generated automatically; the key is what will later link the company's PWD widget to it. Duplicate names are rejected.
+- **A company** (click its name): one summary line (completed calls, total and average call time), the **company key** with *Copy key*, and the **consultants**.
+  - **Assign consultant**: full name and email in one line; the company is the one you are on. The consultant can then sign in to the Partner Portal with that email and receives all of this company's calls. An email can belong to only one consultant.
+  - **Remove** a consultant (with confirmation). Their past calls stay in the statistics.
+- **Statistics.** Three numbers (completed calls, total call time, average call), then the same per company in a table. A completed call is one where the PWD user, the consultant and the translator all joined; only completed calls count towards call time.
+
+Calls made in the Partner Portal appear in the statistics straight away. Example: add a company, assign a consultant, log out, sign in as that consultant, take a call, log out, sign in as `admin` again.
+
+In the Partner Portal, the signed-in person is shown as a **Consultant** of their company (dashboard, profile and call screen), and their history lists only the calls they handled.
 
 ## Incoming call alerts: what works when
 
@@ -76,8 +98,8 @@ src/
 ├── App.tsx                 # flow state: session, page, incoming/active call, history, language
 ├── components/             # Header, LanguageSwitcher, StatusSwitch, StatusBadge, OutcomeBadge, IncomingCall,
 │                           # ParticipantCard, CallControls, ConfirmDialog, Notice, icons
-├── pages/                  # Login, Dashboard, Call, History, Profile
-├── mock/                   # partner (+ mock login), calls (+ routing), translator (+ delays), facilities
+├── pages/                  # Login, Dashboard, Call, History, Profile; Admin/ (AdminApp, Companies, Company, Statistics)
+├── mock/                   # companies + consultants, partner (mock login), calls (+ routing), translator
 ├── i18n/                   # en.ts, ar.ts — all UI text, no hardcoded strings in components
 ├── types/                  # shared TypeScript types
 ├── utils/format.ts         # durations, dates (Gregorian, Latin digits), localized names

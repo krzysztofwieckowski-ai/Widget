@@ -5,6 +5,7 @@ import { BellOffIcon, PhoneEndIcon, PhoneIncomingIcon, VideoIcon } from '../icon
 type IncomingCallProps = {
   t: Translation;
   call: IncomingCallData;
+  companyName: string;
   onJoin: () => void;
   onDecline: () => void;
   isRinging: boolean;
@@ -15,7 +16,7 @@ type IncomingCallProps = {
  * Incoming call card on the dashboard. The arrival itself is announced by App
  * (live region, ringtone, tab title, system notification when the tab is hidden).
  */
-export default function IncomingCall({ t, call, onJoin, onDecline, isRinging, onSilence }: IncomingCallProps) {
+export default function IncomingCall({ t, call, companyName, onJoin, onDecline, isRinging, onSilence }: IncomingCallProps) {
   return (
     <article className="incoming-call" aria-labelledby="incoming-call-title">
       <div className={`incoming-call-icon${isRinging ? ' incoming-call-icon--ringing' : ''}`} aria-hidden="true">
@@ -27,8 +28,8 @@ export default function IncomingCall({ t, call, onJoin, onDecline, isRinging, on
         </h3>
         <dl className="incoming-call-details">
           <div>
-            <dt>{t.facility}</dt>
-            <dd>{t.facilities[call.facilityId]}</dd>
+            <dt>{t.company}</dt>
+            <dd>{companyName}</dd>
           </div>
           <div>
             <dt>{t.callId}</dt>

@@ -1,8 +1,9 @@
-import type { CallLanguage, FacilityId, PartnerStatus } from '../types';
+import type { CallLanguage, PartnerStatus } from '../types';
 
 export const en = {
   appName: '3-Way Call',
   portalName: 'Partner Portal',
+  adminPanel: 'Admin Panel',
   languageSwitcher: 'Language',
 
   // Navigation
@@ -16,7 +17,7 @@ export const en = {
 
   // Login
   loginTitle: 'Sign in',
-  loginDescription: 'Sign in to receive accessibility calls from your branch.',
+  loginDescription: 'Sign in to receive accessibility calls for your company.',
   email: 'Email',
   password: 'Password',
   showPassword: 'Show password',
@@ -37,17 +38,16 @@ export const en = {
   // Dashboard
   dashboardTitle: 'Dashboard',
   welcome: (name: string) => `Welcome, ${name}`,
-  facility: 'Facility',
   incomingCalls: 'Incoming calls',
   noIncomingCalls: 'No incoming calls right now.',
-  noIncomingCallsHint: 'New accessibility calls from your branch will appear here.',
+  noIncomingCallsHint: 'New accessibility calls for your company will appear here.',
   notAvailableHint: 'You will not receive calls until your status is Available.',
   newAccessibilityCall: 'New accessibility call',
   language: 'Language',
   callId: 'Call ID',
   joinCall: 'Join call',
   declineCall: 'Decline',
-  incomingAnnouncement: (facility: string) => `New accessibility call from ${facility}.`,
+  incomingAnnouncement: (company: string) => `New accessibility call for ${company}.`,
   demoTools: 'Demo tools',
   demoToolsNote:
     'For testing only. Simulates a call request sent from the PWD widget. Incoming calls ring and, when this tab is in the background, show a system notification.',
@@ -80,7 +80,7 @@ export const en = {
   participants: 'Participants',
   callDuration: 'Call duration',
   pwdUser: 'PWD User',
-  partnerRole: 'Partner',
+  partnerRole: 'Consultant',
   you: 'You',
   translator: 'Translator',
   stateConnected: 'Connected',
@@ -115,18 +115,54 @@ export const en = {
 
   // Profile
   profileTitle: 'Profile',
-  partnerId: 'Partner ID',
+  partnerId: 'Consultant ID',
+  company: 'Company',
 
-  facilities: {
-    RIYADH_001: 'Riyadh Branch',
-    JEDDAH_001: 'Jeddah Branch',
-    DAMMAM_001: 'Dammam Branch',
-  } satisfies Record<FacilityId, string>,
-  facilityShort: {
-    RIYADH_001: 'Riyadh',
-    JEDDAH_001: 'Jeddah',
-    DAMMAM_001: 'Dammam',
-  } satisfies Record<FacilityId, string>,
+  // Admin panel
+  navCompanies: 'Companies',
+  navStatistics: 'Statistics',
+  companiesTitle: 'Partner companies',
+  addCompany: 'Add company',
+  companyName: 'Company name',
+  companyNameRequired: 'Enter a company name.',
+  companyNameTaken: 'A company with this name already exists.',
+  noCompletedCalls: 'No completed calls yet.',
+  companySummary: (calls: number, total: string, average: string) =>
+    `${calls} completed calls · ${total} in total · ${average} on average`,
+  companyCreated: (name: string) => `${name} was created. Its company key is ready for the PWD widget.`,
+  noCompanies: 'No partner companies yet. Add the first one.',
+  companyKey: 'Company key',
+  companyKeyHint: 'Identifies this company in the PWD widget. Add it to the widget configuration on the company website.',
+  copyKey: 'Copy key',
+  copyKeyLabel: (name: string) => `Copy key of ${name}`,
+  keyCopied: 'Company key copied.',
+  copied: 'Copied',
+  copyFailed: 'Could not copy. Select the key and copy it manually.',
+  consultants: 'Consultants',
+  allCompanies: 'All companies',
+  assignConsultant: 'Assign consultant',
+  consultantName: 'Full name',
+  consultantNameRequired: 'Enter the consultant’s full name.',
+  emailInvalid: 'Enter a valid email address.',
+  emailTaken: (company: string) => `This email is already assigned to a consultant of ${company}.`,
+  consultantAssigned: (name: string) => `${name} was assigned to this company.`,
+  noConsultants: 'No consultants assigned yet. Calls for this company cannot be answered until you assign one.',
+  remove: 'Remove',
+  removeConsultantLabel: (name: string) => `Remove ${name}`,
+  removeConsultantTitle: 'Remove consultant?',
+  removeConsultantDescription: (name: string, company: string) =>
+    `${name} will no longer be able to sign in to the Partner Portal for ${company}. Their past calls stay in the statistics.`,
+  consultantRemoved: (name: string) => `${name} was removed.`,
+  statisticsTitle: 'Statistics',
+  statsCompletedCalls: 'Completed calls',
+  statsTotalTime: 'Total call time',
+  statsAverageTime: 'Average call',
+  statsPerCompany: 'Calls per company',
+  statsNote:
+    'A completed call is one where the PWD user, the consultant and the translator all joined. Call times count completed calls only.',
+  durationHoursMinutes: (h: number, m: number) => `${h} h ${m} min`,
+  durationMinutesSeconds: (m: number, s: number) => `${m} min ${s} s`,
+
   callLanguages: {
     Arabic: 'Arabic',
     English: 'English',

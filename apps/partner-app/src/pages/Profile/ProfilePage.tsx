@@ -4,9 +4,9 @@ import { displayName } from '../../utils/format';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import { UserIcon } from '../../components/icons';
 
-type ProfilePageProps = { t: Translation; language: Language; partner: Partner };
+type ProfilePageProps = { t: Translation; language: Language; partner: Partner; companyName: string };
 
-export default function ProfilePage({ t, language, partner }: ProfilePageProps) {
+export default function ProfilePage({ t, language, partner, companyName }: ProfilePageProps) {
   return (
     <div className="page page--narrow">
       <h1 className="page-title" tabIndex={-1} data-page-heading>
@@ -30,8 +30,8 @@ export default function ProfilePage({ t, language, partner }: ProfilePageProps) 
                   </dd>
           </div>
           <div>
-            <dt>{t.facility}</dt>
-            <dd>{t.facilities[partner.facilityId]}</dd>
+            <dt>{t.company}</dt>
+            <dd>{companyName}</dd>
           </div>
           <div>
             <dt>{t.status}</dt>

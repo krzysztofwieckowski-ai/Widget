@@ -945,6 +945,121 @@ button { cursor: pointer; }
 }
 
 /* =========================================================
+   Admin panel — deliberately plain: tables, one-line forms, few cards
+   ========================================================= */
+.page-heading-group { display: flex; flex-direction: column; gap: 6px; }
+
+.small-text { font-size: 0.85rem; }
+.strong { font-weight: 700; }
+
+/* Numeric columns line up at the end, in both directions. */
+.table .num { text-align: end; font-variant-numeric: tabular-nums; }
+
+.table tbody th {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  font-weight: 700;
+}
+
+.table tbody tr:last-child th { border-bottom: 0; }
+.table .link-button { min-height: 32px; padding: 0; text-align: start; }
+
+.table-scroll { overflow-x: auto; }
+.table--stats { min-width: 520px; }
+
+/* One-line form: fields grow, the button sits at the end of the row. */
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.inline-form .field { flex: 1 1 200px; }
+
+/* Align the button with the inputs (label height + gap). */
+.inline-form > .button { margin-top: 32px; }
+
+.inline-form-error { flex-basis: 100%; }
+
+.field-error {
+  color: var(--danger-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Consultants: name + email, action at the end. */
+.simple-list { display: flex; flex-direction: column; }
+
+.simple-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.simple-list-item:last-child { border-bottom: 0; }
+
+.simple-list-text { display: flex; flex-direction: column; min-width: 0; }
+
+/* Company key: monospace value + copy button */
+.company-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.company-key-value {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.03);
+  color: var(--lavender-text);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+/* KPI row: headline numbers as stat tiles (value in text ink, label muted). */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.kpi dt { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+
+.kpi dd {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .inline-form > .button { width: 100%; margin-top: 0; }
+}
+
+/* =========================================================
    Call screen
    ========================================================= */
 .call {
@@ -983,7 +1098,7 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 
-.call-facility { font-weight: 600; }
+.call-company { font-weight: 600; }
 
 .call-meta {
   display: flex;

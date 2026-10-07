@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import type { Language, Partner } from '../../types';
+import type { Language } from '../../types';
 import type { Translation } from '../../i18n';
-import { authenticate } from '../../mock/partner';
 import LanguageSwitcher from '../../components/LanguageSwitcher/LanguageSwitcher';
 import { AccessibilityIcon, EyeIcon, EyeOffIcon } from '../../components/icons';
 
@@ -9,10 +8,11 @@ type LoginPageProps = {
   t: Translation;
   language: Language;
   onLanguageChange: (language: Language) => void;
-  onLogin: (partner: Partner) => void;
+  /** Returns false when the login is rejected. */
+  onLogin: (login: string, password: string) => boolean;
 };
 
-/** Mock login. Any valid email and any password are accepted; nothing is sent anywhere. */
+/** Mock login: "admin" opens the Admin Panel, any other valid email the Partner Portal; any password. */
 export default function LoginPage({ t, language, onLanguageChange, onLogin }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,12 +21,7 @@ export default function LoginPage({ t, language, onLanguageChange, onLogin }: Lo
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const partner = authenticate(email, password);
-    if (partner) {
-      onLogin(partner);
-    } else {
-      setHasError(true);
-    }
+    setHasError(!onLogin(email, password));
   }
 
   const passwordToggleLabel = showPassword ? t.hidePassword : t.showPassword;

@@ -49,12 +49,20 @@ export const initialConsultants: Consultant[] = [
   },
 ];
 
+/**
+ * Random hex string. Uses crypto.getRandomValues, which every browser supports, also on
+ * non-secure origins (e.g. a LAN IP) — unlike crypto.randomUUID, which is missing there
+ * and in older Safari.
+ */
+function randomHex(bytes: number) {
+  return Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 /** Random company key, e.g. "twc_live_3f9c…". Mock only: a real key would be issued by the backend. */
 export function generateCompanyKey() {
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
-  return `twc_live_${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+  return `twc_live_${randomHex(8)}`;
 }
 
 export function createId(prefix: string) {
-  return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+  return `${prefix}-${randomHex(4)}`;
 }

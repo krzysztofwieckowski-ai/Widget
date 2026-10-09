@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from 'react';
 import type { CallRecord, Company, Consultant, Language } from '../../../types';
 import type { Translation } from '../../../i18n';
 import { getCallStats } from '../../../utils/stats';
@@ -11,39 +10,31 @@ type CompaniesPageProps = {
   companies: Company[];
   consultants: Consultant[];
   calls: CallRecord[];
-  onCreateCompany: (name: string) => void;
+  onAddCompany: () => void;
   onOpenCompany: (companyId: string) => void;
 };
 
-/** Partner companies as one simple table, with a one-line "add company" form under it. */
+/** Partner companies as one simple table; "Add company" opens a separate page. */
 export default function CompaniesPage({
   t,
   language,
   companies,
   consultants,
   calls,
-  onCreateCompany,
+  onAddCompany,
   onOpenCompany,
 }: CompaniesPageProps) {
-  const [name, setName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    const trimmed = name.trim();
-    if (!trimmed) return setError(t.companyNameRequired);
-    const taken = companies.some((c) =>
-      [c.name, c.nameAr].some((existing) => existing?.toLowerCase() === trimmed.toLowerCase()),
-    );
-    if (taken) return setError(t.companyNameTaken);
-    onCreateCompany(trimmed);
-  }
-
   return (
     <div className="page page--narrow">
-      <h1 className="page-title" tabIndex={-1} data-page-heading>
-        {t.companiesTitle}
-      </h1>
+      <div className="page-header">
+        <h1 className="page-title" tabIndex={-1} data-page-heading>
+          {t.companiesTitle}
+        </h1>
+        <button type="button" className="button button--primary" onClick={onAddCompany}>
+          <PlusIcon />
+          {t.addCompany}
+        </button>
+      </div>
 
       <section className="card" aria-labelledby="companies-table-title">
         <h2 id="companies-table-title" className="visually-hidden">
@@ -82,34 +73,6 @@ export default function CompaniesPage({
             </tbody>
           </table>
         )}
-
-        <form className="inline-form" onSubmit={handleSubmit} noValidate>
-          <div className="field">
-            <label htmlFor="company-name" className="field-label">
-              {t.companyName}
-            </label>
-            <input
-              id="company-name"
-              className="input"
-              value={name}
-              aria-invalid={error !== null}
-              aria-describedby={error ? 'company-name-error' : undefined}
-              onChange={(event) => {
-                setName(event.target.value);
-                setError(null);
-              }}
-            />
-          </div>
-          <button type="submit" className="button button--primary">
-            <PlusIcon />
-            {t.addCompany}
-          </button>
-          {error && (
-            <p id="company-name-error" className="field-error inline-form-error" role="alert">
-              {error}
-            </p>
-          )}
-        </form>
       </section>
     </div>
   );

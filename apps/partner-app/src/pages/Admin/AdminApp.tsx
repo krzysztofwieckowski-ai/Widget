@@ -5,6 +5,7 @@ import Header from '../../components/Header/Header';
 import { BuildingIcon, ChartIcon } from '../../components/icons';
 import CompaniesPage from './Companies/CompaniesPage';
 import CompanyPage from './Company/CompanyPage';
+import NewCompanyPage from './NewCompany/NewCompanyPage';
 import StatisticsPage from './Statistics/StatisticsPage';
 
 type AdminAppProps = {
@@ -72,6 +73,11 @@ export default function AdminApp({
   const company = companies.find((c) => c.id === companyId);
 
   function renderPage() {
+    if (page === 'new-company') {
+      return (
+        <NewCompanyPage t={t} companies={companies} onCreate={createCompany} onCancel={() => navigate('companies')} />
+      );
+    }
     if (page === 'company' && company) {
       return (
         <CompanyPage
@@ -107,7 +113,7 @@ export default function AdminApp({
         companies={companies}
         consultants={consultants}
         calls={calls}
-        onCreateCompany={createCompany}
+        onAddCompany={() => setPage('new-company')}
         onOpenCompany={openCompany}
       />
     );

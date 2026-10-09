@@ -10,7 +10,7 @@ export type CallLanguage = 'Arabic' | 'English';
 export type Page = 'dashboard' | 'call' | 'history' | 'profile';
 
 /** Admin panel screens. */
-export type AdminPage = 'companies' | 'company' | 'statistics';
+export type AdminPage = 'companies' | 'new-company' | 'company' | 'statistics';
 
 /** A partner company (e.g. a bank). Its key links the company's PWD widget to it. */
 export interface Company {

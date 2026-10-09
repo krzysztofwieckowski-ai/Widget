@@ -20,6 +20,7 @@ The app has two roles. It is a mock login: any non-empty password works.
 | Login | Role |
 | --- | --- |
 | `admin` | **Admin Panel**: partner companies, consultants, statistics |
+| `partner` | **Partner Portal**, as the demo consultant Sarah Ahmed (Al Rawdah Bank) |
 | an email of a consultant (e.g. `sarah@example.com`, `omar@example.com`, `layla@example.com`, or one the admin added) | **Partner Portal**, as that consultant (of their company) |
 | any other valid email | **Partner Portal**, as the demo consultant Sarah Ahmed (Al Rawdah Bank) |
 
@@ -53,9 +54,22 @@ Switch **EN | العربية** at any point, including during a call. The whole 
 
 Sign in with `admin` and any password.
 
-- **Companies.** One table: company, number of consultants, completed calls. Under it, a one-line form adds a company: type the name and press *Add company*. Its key (`twc_live_…`) is generated automatically; the key is what will later link the company's PWD widget to it. Duplicate names are rejected.
-- **A company** (click its name): one summary line (completed calls, total and average call time), the **company key** with *Copy key*, and the **consultants**.
-  - **Assign consultant**: full name and email in one line; the company is the one you are on. The consultant can then sign in to the Partner Portal with that email and receives all of this company's calls. An email can belong to only one consultant.
+- **Companies.** One table: company, number of consultants, completed calls. **Add company** (next to the title) opens a separate page with the company name; *Create company* generates its key (`twc_live_…`, what links the company's PWD widget to it) and takes you to the new company's page. Duplicate names are rejected.
+- **A company** (click its name; you also land here right after adding one): one summary line (completed calls, total and average call time), then two columns: **Consultants** (the add form first, as one row: first name, last name, email, *Add*; the list under it) and **Widget installation**. On narrower screens the columns stack.
+  - **Embed script**: a ready-to-send snippet with the company key, with *Copy script*. The company pastes it before `</body>` on its website; the `data-company-key` attribute tells us which company each call comes from:
+
+    ```html
+    <!-- 3-Way Call accessibility widget -->
+    <script
+      src="https://widget.3waycall.example/embed.js"
+      data-company-key="twc_live_7f3a9c21e4b0d58a"
+      async
+    ></script>
+    ```
+
+    The script address is a placeholder (`.example` is a reserved domain); set `VITE_WIDGET_SCRIPT_URL` in `apps/partner-app/.env.local` to change it. The loader `embed.js` itself is not part of this POC yet: the bank website still embeds the widget with its own iframe.
+  - **Company key** on its own, with *Copy key*.
+  - **Assign consultant**: first name, last name and email (all required); the company is the one you are on. The consultant can then sign in to the Partner Portal with that email and receives all of this company's calls. An email can belong to only one consultant.
   - **Remove** a consultant (with confirmation). Their past calls stay in the statistics.
 - **Statistics.** Three numbers (completed calls, total call time, average call), then the same per company in a table. A completed call is one where the PWD user, the consultant and the translator all joined; only completed calls count towards call time.
 

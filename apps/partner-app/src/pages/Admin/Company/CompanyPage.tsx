@@ -5,6 +5,7 @@ import { isValidEmail } from '../../../mock/partner';
 import { getCallStats } from '../../../utils/stats';
 import { displayName, formatLongDuration } from '../../../utils/format';
 import CompanyKey from '../../../components/CompanyKey/CompanyKey';
+import EmbedScript from '../../../components/EmbedScript/EmbedScript';
 import ConfirmDialog from '../../../components/ConfirmDialog/ConfirmDialog';
 import Notice from '../../../components/Notice/Notice';
 import { ChevronBackIcon, PlusIcon } from '../../../components/icons';
@@ -24,7 +25,12 @@ type CompanyPageProps = {
   onAnnounce: (message: string) => void;
 };
 
-type FieldErrors = { name?: string; email?: string };
+/** Error kinds, not texts, so the messages follow a language switch. */
+type FieldErrors = {
+  firstName?: 'required';
+  lastName?: 'required';
+  email?: { kind: 'invalid' } | { kind: 'taken'; companyId: string };
+};
 
 /** One partner company: a summary line, its widget key and its consultants. */
 export default function CompanyPage({
@@ -40,7 +46,8 @@ export default function CompanyPage({
   onRemoveConsultant,
   onAnnounce,
 }: CompanyPageProps) {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [toRemove, setToRemove] = useState<Consultant | null>(null);
@@ -53,27 +60,39 @@ export default function CompanyPage({
 
   function handleAssign(event: FormEvent) {
     event.preventDefault();
-    const trimmedName = name.trim();
+    const trimmedFirst = firstName.trim();
+    const trimmedLast = lastName.trim();
     const trimmedEmail = email.trim();
     const nextErrors: FieldErrors = {};
-    if (!trimmedName) nextErrors.name = t.consultantNameRequired;
+    if (!trimmedFirst) nextErrors.firstName = 'required';
+    if (!trimmedLast) nextErrors.lastName = 'required';
     if (!isValidEmail(trimmedEmail)) {
-      nextErrors.email = t.emailInvalid;
+      nextErrors.email = { kind: 'invalid' };
     } else {
       const owner = consultants.find((c) => c.email.toLowerCase() === trimmedEmail.toLowerCase());
-      const ownerCompany = owner && companies.find((c) => c.id === owner.companyId);
-      if (ownerCompany) nextErrors.email = t.emailTaken(displayName(ownerCompany, language));
+      if (owner) nextErrors.email = { kind: 'taken', companyId: owner.companyId };
     }
     setErrors(nextErrors);
-    if (nextErrors.name || nextErrors.email) {
-      document.getElementById(nextErrors.name ? 'consultant-name' : 'consultant-email')?.focus();
+    // Focus the first field with an error.
+    const firstInvalid = (['firstName', 'lastName', 'email'] as const).find((field) => nextErrors[field]);
+    if (firstInvalid) {
+      document.getElementById(`consultant-${firstInvalid}`)?.focus();
       return;
     }
 
-    onAssignConsultant({ name: trimmedName, email: trimmedEmail, companyId: company.id });
-    onAnnounce(t.consultantAssigned(trimmedName));
-    setName('');
+    // Shown everywhere as one name ("First Last").
+    const fullName = `${trimmedFirst} ${trimmedLast}`;
+    onAssignConsultant({ name: fullName, email: trimmedEmail, companyId: company.id });
+    onAnnounce(t.consultantAssigned(fullName));
+    setFirstName('');
+    setLastName('');
     setEmail('');
+  }
+
+  function emailErrorText(error: NonNullable<FieldErrors['email']>) {
+    if (error.kind === 'invalid') return t.emailInvalid;
+    const ownerCompany = companies.find((c) => c.id === error.companyId);
+    return t.emailTaken(ownerCompany ? displayName(ownerCompany, language) : '');
   }
 
   function confirmRemove() {
@@ -84,7 +103,7 @@ export default function CompanyPage({
   }
 
   return (
-    <div className="page page--narrow">
+    <div className="page">
       <button type="button" className="link-button" onClick={onBack}>
         <ChevronBackIcon />
         {t.allCompanies}
@@ -103,93 +122,126 @@ export default function CompanyPage({
 
       {justCreated && <Notice tone="success">{t.companyCreated(companyName)}</Notice>}
 
-      <section className="card" aria-labelledby="company-key-title">
-        <h2 id="company-key-title" className="card-title">
-          {t.companyKey}
-        </h2>
-        <CompanyKey t={t} companyName={companyName} companyKey={company.key} onAnnounce={onAnnounce} />
-        <p className="muted small-text">{t.companyKeyHint}</p>
-      </section>
+      {/* Two columns on wide screens: consultants (add form first, then the list) | widget installation. */}
+      <div className="company-layout">
+        <section className="card" aria-labelledby="consultants-title">
+          <h2 id="consultants-title" className="card-title">
+            {t.consultants}
+          </h2>
 
-      <section className="card" aria-labelledby="consultants-title">
-        <h2 id="consultants-title" className="card-title">
-          {t.consultants}
-        </h2>
-
-        {companyConsultants.length === 0 ? (
-          <p className="muted">{t.noConsultants}</p>
-        ) : (
-          <ul className="simple-list">
-            {companyConsultants.map((consultant) => {
-              const consultantName = displayName(consultant, language);
-              return (
-                <li key={consultant.id} className="simple-list-item">
-                  <div className="simple-list-text">
-                    <span className="strong">{consultantName}</span>
-                    <span className="muted small-text" dir="ltr">
-                      {consultant.email}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    className="button button--ghost button--small"
-                    aria-label={t.removeConsultantLabel(consultantName)}
-                    onClick={() => setToRemove(consultant)}
-                  >
-                    {t.remove}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        <form className="inline-form" onSubmit={handleAssign} noValidate aria-label={t.assignConsultant}>
-          <div className="field">
-            <label htmlFor="consultant-name" className="field-label">
-              {t.consultantName}
-            </label>
-            <input
-              id="consultant-name"
-              className="input"
-              value={name}
-              aria-invalid={errors.name !== undefined}
-              aria-describedby={errors.name ? 'consultant-name-error' : undefined}
-              onChange={(event) => setName(event.target.value)}
-            />
-            {errors.name && (
-              <p id="consultant-name-error" className="field-error">
-                {errors.name}
-              </p>
+          <form className="consultant-form" onSubmit={handleAssign} noValidate aria-label={t.assignConsultant}>
+            <div className="field">
+              <label htmlFor="consultant-firstName" className="field-label">
+                {t.firstName}
+              </label>
+              <input
+                id="consultant-firstName"
+                className="input"
+                autoComplete="off"
+                value={firstName}
+                aria-invalid={errors.firstName !== undefined}
+                aria-describedby={errors.firstName ? 'consultant-firstName-error' : undefined}
+                onChange={(event) => setFirstName(event.target.value)}
+              />
+              {errors.firstName && (
+                <p id="consultant-firstName-error" className="field-error">
+                  {t.firstNameRequired}
+                </p>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="consultant-lastName" className="field-label">
+                {t.lastName}
+              </label>
+              <input
+                id="consultant-lastName"
+                className="input"
+                autoComplete="off"
+                value={lastName}
+                aria-invalid={errors.lastName !== undefined}
+                aria-describedby={errors.lastName ? 'consultant-lastName-error' : undefined}
+                onChange={(event) => setLastName(event.target.value)}
+              />
+              {errors.lastName && (
+                <p id="consultant-lastName-error" className="field-error">
+                  {t.lastNameRequired}
+                </p>
+              )}
+            </div>
+            <div className="field">
+              <label htmlFor="consultant-email" className="field-label">
+                {t.email}
+              </label>
+              <input
+                id="consultant-email"
+                className="input"
+                type="email"
+                dir="ltr"
+                autoComplete="off"
+                value={email}
+                aria-invalid={errors.email !== undefined}
+                aria-describedby={errors.email ? 'consultant-email-error' : undefined}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+              {errors.email && (
+                <p id="consultant-email-error" className="field-error">
+                  {emailErrorText(errors.email)}
+                </p>
+              )}
+            </div>
+            <button type="submit" className="button button--primary" aria-label={t.addConsultant}>
+              <PlusIcon />
+              {t.add}
+            </button>
+          </form>
+          <div className="consultants-list">
+            {companyConsultants.length === 0 ? (
+              <p className="muted">{t.noConsultants}</p>
+            ) : (
+              <ul className="simple-list">
+                {companyConsultants.map((consultant) => {
+                  const consultantName = displayName(consultant, language);
+                  return (
+                    <li key={consultant.id} className="simple-list-item">
+                      <div className="simple-list-text">
+                        <span className="strong">{consultantName}</span>
+                        <span className="muted small-text" dir="ltr">
+                          {consultant.email}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="button button--ghost button--small"
+                        aria-label={t.removeConsultantLabel(consultantName)}
+                        onClick={() => setToRemove(consultant)}
+                      >
+                        {t.remove}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
-          <div className="field">
-            <label htmlFor="consultant-email" className="field-label">
-              {t.email}
-            </label>
-            <input
-              id="consultant-email"
-              className="input"
-              type="email"
-              dir="ltr"
-              autoComplete="off"
-              value={email}
-              aria-invalid={errors.email !== undefined}
-              aria-describedby={errors.email ? 'consultant-email-error' : undefined}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-            {errors.email && (
-              <p id="consultant-email-error" className="field-error">
-                {errors.email}
-              </p>
-            )}
+        </section>
+        <section className="card" aria-labelledby="widget-title">
+          <h2 id="widget-title" className="card-title">
+            {t.widgetInstallation}
+          </h2>
+
+          <div className="card-section">
+            <h3 className="form-title">{t.embedScript}</h3>
+            <p className="muted small-text">{t.embedScriptHint}</p>
+            <EmbedScript t={t} company={company} companyName={companyName} onAnnounce={onAnnounce} />
           </div>
-          <button type="submit" className="button button--primary">
-            <PlusIcon />
-            {t.assignConsultant}
-          </button>
-        </form>
-      </section>
+
+          <div className="card-section">
+            <h3 className="form-title">{t.companyKey}</h3>
+            <p className="muted small-text">{t.companyKeyHint}</p>
+            <CompanyKey t={t} companyName={companyName} companyKey={company.key} onAnnounce={onAnnounce} />
+          </div>
+        </section>
+      </div>
 
       <ConfirmDialog
         open={toRemove !== null}

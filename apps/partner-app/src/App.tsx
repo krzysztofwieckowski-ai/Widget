@@ -132,7 +132,9 @@ export default function App() {
   }
 
   function assignConsultant(consultant: Omit<Consultant, 'id'>) {
-    setConsultants((current) => [...current, { ...consultant, id: createId('consultant') }]);
+    // The id is created here, not inside the state updater, so the updater stays pure.
+    const newConsultant: Consultant = { ...consultant, id: createId('consultant') };
+    setConsultants((current) => [...current, newConsultant]);
   }
 
   function removeConsultant(consultantId: string) {

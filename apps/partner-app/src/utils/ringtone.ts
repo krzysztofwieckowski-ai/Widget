@@ -16,7 +16,9 @@ const RING_INTERVAL_S = 2;
 let audioContext: AudioContext | null = null;
 let activeOutput: GainNode | null = null;
 
+/** No ringtone (but no crash either) in browsers without the Web Audio API. */
 export function unlockAudio() {
+  if (typeof AudioContext === 'undefined') return;
   audioContext ??= new AudioContext();
   if (audioContext.state === 'suspended') void audioContext.resume();
 }
@@ -44,7 +46,8 @@ function scheduleChime(context: AudioContext, output: GainNode, time: number) {
 export function startRingtone() {
   unlockAudio();
   stopRingtone();
-  const context = audioContext!;
+  const context = audioContext;
+  if (!context) return;
   const output = context.createGain();
   output.connect(context.destination);
   activeOutput = output;

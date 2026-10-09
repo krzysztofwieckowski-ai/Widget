@@ -33,10 +33,10 @@ All data (companies, consultants, call history) is shared in memory between the 
 3. **Demo tools → Simulate incoming call.** A *New accessibility call* card appears (CALL-001, Al Rawdah Bank). The partner is alerted in several ways:
    - a **ringtone**, generated with Web Audio, with no audio file. It stops when the partner joins, clicks *Silence ringtone*, or after 30 s.
    - a badge on *Dashboard* in the navigation
-   - the tab title changes to *(1) Incoming call · …*
+   - the browser tab shows the call (`src/hooks/useTabCallIndicator.ts`): the **favicon** turns into a phone with a pulsing green dot (visible even on narrow or pinned tabs), and the **title** reads *(1) Incoming call · …* — in a background tab it blinks every second between *📞 Incoming call* and the normal title. Both are restored once the call is answered or declined.
    - a screen-reader announcement
    - when the tab is in the background, a **system notification**. Clicking it brings the partner back to the app.
-   - **Simulate in 5 s** gives you time to switch to another tab or app, so you can hear the ringtone and see the system notification. The first click asks for notification permission.
+   - **Simulate in 5 s** gives you time to switch to another tab or app, so you can hear the ringtone and see the system notification. Permission for system notifications is asked once, when a consultant signs in.
    - A consultant only ever receives calls for their **own company**; there are no branches. The simulated call always comes from the consultant's company widget, and the dashboard and history only list the calls this consultant handled.
    - If the status is not *Available*, the call is not routed to Sarah.
    - **Decline** rejects the call. It stops the ringtone and the notification, and logs the call in the history as *Declined*. No banner is shown; a screen reader announces the decline.
@@ -82,7 +82,7 @@ In the Partner Portal, the signed-in person is shown as a **Consultant** of thei
 | Situation | What the partner gets |
 | --- | --- |
 | Partner App open and visible | Card, ringtone, nav badge, screen-reader announcement |
-| Partner App open in a **background tab** or minimised | Ringtone (audio was unlocked by the earlier login click), system notification (if permission was granted), `(1)` in the tab title |
+| Partner App open in a **background tab** or minimised | Ringtone (audio was unlocked by the earlier login click), system notification (if permission was granted at sign-in), blinking tab title and phone favicon |
 | Partner App **closed** | Nothing. This would need Web Push (service worker + a push server) or a desktop/mobile app. That is out of scope for this frontend-only POC. |
 
 Browsers only allow sound after the user has interacted with the page. The login click unlocks audio for the whole session.

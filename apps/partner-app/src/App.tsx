@@ -11,6 +11,7 @@ import {
   requestNotificationPermission,
   showIncomingCallNotification,
 } from './utils/systemNotification';
+import { useTabCallIndicator } from './hooks/useTabCallIndicator';
 import Header from './components/Header/Header';
 import { DashboardIcon, HistoryIcon, UserIcon } from './components/icons';
 import AdminApp from './pages/Admin/AdminApp';
@@ -72,11 +73,11 @@ export default function App() {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   }, [language]);
 
-  // The tab title shows a waiting call, so it is visible in the tab bar from another tab.
-  useEffect(() => {
-    const baseTitle = `${t.appName} · ${isAdmin ? t.adminPanel : t.portalName}`;
-    document.title = incomingCall ? `(1) ${t.tabTitleIncoming} · ${baseTitle}` : baseTitle;
-  }, [t, incomingCall, isAdmin]);
+  // A waiting call shows in the browser tab itself (title + favicon), so it is noticeable from another tab.
+  useTabCallIndicator(incomingCall !== null, {
+    baseTitle: `${t.appName} · ${isAdmin ? t.adminPanel : t.portalName}`,
+    incomingLabel: t.tabTitleIncoming,
+  });
 
   // Ringtone while a call is waiting; stops on join, on "Silence ringtone" or after RINGTONE_MAX_MS.
   useEffect(() => {
@@ -118,8 +119,10 @@ export default function App() {
       setIsAdmin(true);
       return true;
     }
-    // The login click is a user gesture: unlock audio so later calls can ring even in a background tab.
+    // The login click is a user gesture: unlock audio so later calls can ring even in a background tab,
+    // and ask once for permission to show system notifications for incoming calls.
     unlockAudio();
+    requestNotificationPermission();
     setPartner(result.partner);
     setPage('dashboard');
     return true;

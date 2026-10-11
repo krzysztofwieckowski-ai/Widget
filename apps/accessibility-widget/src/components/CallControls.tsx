@@ -5,6 +5,8 @@ type CallControlsProps = {
   t: Translation;
   muted: boolean;
   cameraOff: boolean;
+  /** "Leave" before the call has started, "End call" after. */
+  endLabel: string;
   onToggleMute: () => void;
   onToggleCamera: () => void;
   onEndCall: () => void;
@@ -18,6 +20,7 @@ export default function CallControls({
   t,
   muted,
   cameraOff,
+  endLabel,
   onToggleMute,
   onToggleCamera,
   onEndCall,
@@ -36,7 +39,7 @@ export default function CallControls({
 
       <button type="button" className="control-button control-button--end" onClick={onEndCall}>
         <PhoneEndIcon />
-        <span className="control-label">{t.endCall}</span>
+        <span className="control-label">{endLabel}</span>
       </button>
     </div>
   );

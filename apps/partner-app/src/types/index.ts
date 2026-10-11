@@ -7,10 +7,21 @@ export type PartnerStatus = 'AVAILABLE' | 'BUSY' | 'OFFLINE';
 export type CallLanguage = 'Arabic' | 'English';
 
 /** Screens shown after login. There is no router: the current page is plain React state. */
-export type Page = 'dashboard' | 'call' | 'history' | 'profile';
+export type Page = 'dashboard' | 'call' | 'callEnded' | 'history' | 'profile';
 
 /** Admin panel screens. */
 export type AdminPage = 'companies' | 'new-company' | 'company' | 'statistics';
+
+/**
+ * The company's contact person. The monthly call report goes to them (mock: nothing is really sent), and so do
+ * the consultants' access details, which they pass on.
+ */
+export interface ReportSettings {
+  contactName: string;
+  contactEmail: string;
+  /** When true, the report for the previous calendar month is sent automatically on the 1st of every month. */
+  monthly: boolean;
+}
 
 /** A partner company (e.g. a bank). Its key links the company's PWD widget to it. */
 export interface Company {
@@ -20,6 +31,8 @@ export interface Company {
   nameAr?: string;
   key: string;
   createdAt: string;
+  /** Contact for the monthly call report; set by the admin on the company page. */
+  reportSettings?: ReportSettings;
 }
 
 /** A person assigned by the admin to a partner company; signs in to the Partner Portal. */
@@ -30,6 +43,8 @@ export interface Consultant {
   nameAr?: string;
   email: string;
   companyId: string;
+  /** ISO date-time of when the admin last sent this consultant's access details (mock: nothing is really sent). */
+  accessSentAt?: string;
 }
 
 /** The consultant signed in to the Partner Portal, with their live availability. */

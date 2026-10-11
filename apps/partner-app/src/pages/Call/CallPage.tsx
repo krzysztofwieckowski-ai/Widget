@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { IncomingCall, Language, Partner, TranslatorState } from '../../types';
 import type { Translation } from '../../i18n';
-import { mockTranslator, TRANSLATOR_CONNECT_MS, TRANSLATOR_SEARCH_MS } from '../../mock/translator';
+import {
+  mockTranslator,
+  TRANSLATOR_FOUND_MS,
+  TRANSLATOR_JOINED_MS,
+  USER_FOUND_MS,
+  USER_JOINED_MS,
+} from '../../mock/translator';
 import { displayName, formatDuration } from '../../utils/format';
 import ParticipantCard from '../../components/ParticipantCard/ParticipantCard';
 import CallControls from '../../components/CallControls/CallControls';
@@ -28,19 +34,20 @@ const STARTED_BANNER_MS = 2500;
 /**
  * The partner's side of the shared call. Mock only: no audio, video or WebRTC.
  *
- * Lobby → call: when the partner joins, the PWD user is already there and a translator is matched
- * automatically (searching → connecting → connected). The call only starts — timer running,
- * "Connected" — once all three roles are present, matching the widget's one-call rule.
+ * Lobby → call: when the partner joins, the user and then the translator join one after the other, 4 seconds
+ * apart (searching → connecting → connected). The call only starts — video, timer running, "Connected" —
+ * once all three roles are present, matching the widget's one-call rule.
  */
 export default function CallPage({ t, language, partner, companyName, call, onEndCall }: CallPageProps) {
   const [muted, setMuted] = useState(false);
   const [cameraOff, setCameraOff] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const [userState, setUserState] = useState<TranslatorState>('searching');
   const [translatorState, setTranslatorState] = useState<TranslatorState>('searching');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [showStartedBanner, setShowStartedBanner] = useState(false);
 
-  const isStarted = translatorState === 'connected';
+  const isStarted = userState === 'connected' && translatorState === 'connected';
 
   // Briefly confirm over the cameras that everyone joined, then get out of the way.
   useEffect(() => {
@@ -50,16 +57,16 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
     return () => window.clearTimeout(id);
   }, [isStarted]);
 
-  // Simulated translator matching: searching → found & connecting → connected.
+  // Simulated joining of the user, then the translator.
   useEffect(() => {
-    if (translatorState === 'connected') return;
-    const [next, delay] =
-      translatorState === 'searching'
-        ? (['connecting', TRANSLATOR_SEARCH_MS] as const)
-        : (['connected', TRANSLATOR_CONNECT_MS] as const);
-    const id = window.setTimeout(() => setTranslatorState(next), delay);
-    return () => window.clearTimeout(id);
-  }, [translatorState]);
+    const ids = [
+      window.setTimeout(() => setUserState('connecting'), USER_FOUND_MS),
+      window.setTimeout(() => setUserState('connected'), USER_JOINED_MS),
+      window.setTimeout(() => setTranslatorState('connecting'), TRANSLATOR_FOUND_MS),
+      window.setTimeout(() => setTranslatorState('connected'), TRANSLATOR_JOINED_MS),
+    ];
+    return () => ids.forEach((id) => window.clearTimeout(id));
+  }, []);
 
   // The call timer only runs once the call has started.
   useEffect(() => {
@@ -71,23 +78,30 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
   const translatorName = displayName(mockTranslator, language);
   const translatorLanguages = mockTranslator.languages.map((l) => t.callLanguages[l]).join(' / ');
   const translatorFound = translatorState !== 'searching';
-  const joinedCount = isStarted ? 3 : 2;
+  const joinedCount = 1 + (userState === 'connected' ? 1 : 0) + (translatorState === 'connected' ? 1 : 0);
 
-  const statusText = {
-    searching: t.searchingTranslator,
-    connecting: t.translatorFound(translatorName),
-    connected: t.translatorJoined(translatorName),
-  }[translatorState];
+  const statusText =
+    userState === 'searching'
+      ? t.waitingForUser
+      : userState === 'connecting'
+        ? t.userJoining
+        : {
+            searching: t.searchingTranslator,
+            connecting: t.translatorFound(translatorName),
+            connected: t.translatorJoined(translatorName),
+          }[translatorState];
 
   return (
     <section className={`call${isStarted ? '' : ' call--lobby'}`} aria-labelledby="call-title">
       <div className="call-inner">
         <div className="call-header">
           <div className="call-heading">
-            <h1 id="call-title" className="call-title" tabIndex={-1} data-page-heading>
-              {t.callTitle}
-            </h1>
-            <p className="call-company">{companyName}</p>
+            <div className="call-title-row">
+              <h1 id="call-title" className="call-title" tabIndex={-1} data-page-heading>
+                {t.callTitle}
+              </h1>
+              <p className="call-company">{companyName}</p>
+            </div>
             <p className="call-meta">
               {isStarted ? (
                 <>
@@ -147,8 +161,16 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               variant="pwd"
               name={t.pwdUser}
               avatar={<AccessibilityIcon />}
-              state="connected"
-              stateLabel={t.stateConnected}
+              photo="/images/pwd.jpg"
+              showVideo={isStarted}
+              state={userState}
+              stateLabel={
+                {
+                  searching: t.stateWaiting,
+                  connecting: t.stateConnecting,
+                  connected: isStarted ? t.stateConnected : t.stateJoined,
+                }[userState]
+              }
               mutedLabel={t.micOff}
               cameraOffLabel={t.cameraOff}
             />
@@ -157,8 +179,10 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               name={displayName(partner, language)}
               role={`${t.partnerRole} · ${t.you}`}
               avatar={<HeadsetIcon />}
+              photo="/images/partner.jpg"
+              showVideo={isStarted}
               state="connected"
-              stateLabel={t.stateConnected}
+              stateLabel={isStarted ? t.stateConnected : t.stateJoined}
               muted={muted}
               cameraOff={cameraOff}
               mutedLabel={t.micOff}
@@ -169,12 +193,14 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               name={translatorFound ? translatorName : t.translator}
               role={translatorFound ? `${t.translator} · ${translatorLanguages}` : undefined}
               avatar={<TranslatorIcon />}
+              photo="/images/translator.jpg"
+              showVideo={isStarted}
               state={translatorState}
               stateLabel={
                 {
                   searching: t.stateSearching,
                   connecting: t.stateConnecting,
-                  connected: t.stateConnected,
+                  connected: isStarted ? t.stateConnected : t.stateJoined,
                 }[translatorState]
               }
               mutedLabel={t.micOff}

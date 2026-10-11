@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { AdminPage, CallRecord, Company, Consultant, Language } from '../../types';
+import type { AdminPage, CallRecord, Company, Consultant, Language, ReportSettings } from '../../types';
 import type { Translation } from '../../i18n';
 import Header from '../../components/Header/Header';
 import { BuildingIcon, ChartIcon } from '../../components/icons';
@@ -19,6 +19,8 @@ type AdminAppProps = {
   onCreateCompany: (name: string) => Company;
   onAssignConsultant: (consultant: Omit<Consultant, 'id'>) => void;
   onRemoveConsultant: (consultantId: string) => void;
+  onSaveReportSettings: (companyId: string, settings: ReportSettings | undefined) => void;
+  onSendAccessDetails: (consultantId: string) => void;
   onLogout: () => void;
   onAnnounce: (message: string) => void;
 };
@@ -34,6 +36,8 @@ export default function AdminApp({
   onCreateCompany,
   onAssignConsultant,
   onRemoveConsultant,
+  onSaveReportSettings,
+  onSendAccessDetails,
   onLogout,
   onAnnounce,
 }: AdminAppProps) {
@@ -81,6 +85,7 @@ export default function AdminApp({
     if (page === 'company' && company) {
       return (
         <CompanyPage
+          key={company.id}
           t={t}
           language={language}
           company={company}
@@ -91,6 +96,8 @@ export default function AdminApp({
           onBack={() => navigate('companies')}
           onAssignConsultant={onAssignConsultant}
           onRemoveConsultant={onRemoveConsultant}
+          onSaveReportSettings={onSaveReportSettings}
+          onSendAccessDetails={onSendAccessDetails}
           onAnnounce={onAnnounce}
         />
       );

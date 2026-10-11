@@ -8,6 +8,7 @@ export const initialCompanies: Company[] = [
     nameAr: 'بنك الروضة',
     key: 'twc_live_7f3a9c21e4b0d58a',
     createdAt: '2026-09-01T10:00:00',
+    reportSettings: { contactName: 'Mariam Al-Qahtani', contactEmail: 'accessibility@alrawdah.example.com', monthly: true },
   },
   {
     id: 'company-002',

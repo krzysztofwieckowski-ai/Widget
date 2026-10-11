@@ -169,9 +169,6 @@ a { color: var(--brand); }
   width: 380px; height: min(560px, calc(100dvh - 48px));
   border-radius: 16px;
 }
-.widget-frame-container.is-open.is-expanded {
-  width: min(1100px, calc(100vw - 48px)); height: calc(100dvh - 48px);
-}
 .widget-frame { display: block; width: 100%; height: 100%; border: 0; background: transparent; }
 
 /* =========================================================
@@ -196,8 +193,7 @@ a { color: var(--brand); }
 
 /* Mobile: the open widget takes the full screen. */
 @media (max-width: 480px) {
-  .widget-frame-container.is-open,
-  .widget-frame-container.is-open.is-expanded {
+  .widget-frame-container.is-open {
     inset: 0; width: 100%; height: 100%; border-radius: 0;
   }
 }

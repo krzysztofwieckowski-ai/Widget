@@ -128,11 +128,6 @@ button {
   overflow: hidden;
 }
 
-.widget--standalone .panel--expanded {
-  width: min(1100px, calc(100vw - 48px));
-  height: calc(100dvh - 48px);
-}
-
 @media (max-width: 480px) {
   .widget--standalone .panel {
     inset: 0;
@@ -329,6 +324,32 @@ button {
 /* Back stays compact so the main action has room for its label. */
 .screen-actions .button--secondary:not(.button--full) { flex: 0 0 auto; }
 
+/* Name field on the first screen. */
+.name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field label { font-size: 0.9rem; font-weight: 700; }
+
+.field input {
+  font: inherit;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field input[aria-invalid='true'] { border-color: var(--danger-text); border-width: 2px; }
+
+.field-error { color: var(--danger-text); font-size: 0.9rem; font-weight: 600; }
+
 /* =========================================================
    Buttons — pill shaped, as in the Partner App
    ========================================================= */
@@ -402,8 +423,8 @@ button {
   border-radius: 50%;
 }
 
-/* Same role colours as the call tiles: support agent violet, translator cyan. */
-.person-icon--agent { background: var(--brand-soft); color: var(--brand-text); }
+/* Same role colours as the call tiles: partner violet, translator cyan. */
+.person-icon--partner { background: var(--brand-soft); color: var(--brand-text); }
 .person-icon--translator { background: rgb(21 211 255 / 0.14); color: var(--cyan-text); }
 
 .people-plus {
@@ -456,6 +477,38 @@ button {
   to { transform: rotate(360deg); }
 }
 
+/* Centred screens (connecting, call ended): everything in the middle, with a big button right under the text. */
+.screen--centered .screen-content {
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 10vh;
+  text-align: center;
+}
+.screen--centered .screen-icon { width: 96px; height: 96px; margin-bottom: 8px; }
+.screen--centered .spinner { width: 52px; height: 52px; border-width: 5px; }
+.screen--centered .screen-icon .icon { width: 48px; height: 48px; }
+.screen--centered .screen-title { font-size: 1.75rem; }
+.screen--centered .screen-text { max-width: 480px; font-size: 1.15rem; line-height: 1.5; }
+
+.waiting-cancel,
+.big-button {
+  min-width: min(100%, 300px);
+  min-height: 60px;
+  margin-top: 12px;
+  padding-inline: 32px;
+  font-size: 1.15rem;
+}
+
+/* Call ended: the Close button is the most visible element on the screen. */
+.big-button {
+  min-height: 64px;
+  margin-top: 16px;
+  padding-inline: 40px;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 16px rgb(90 92 255 / 0.45);
+}
+
 /* =========================================================
    Mock video call
    ========================================================= */
@@ -474,7 +527,16 @@ button {
   padding: 14px 16px 10px;
 }
 
-.call-title { font-size: 1.1rem; font-weight: 700; }
+/* The shared-call description sits on the same line as the "Assistance call" title (wraps below it on narrow screens). */
+.call-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 16px;
+  row-gap: 2px;
+}
+
+.call-title { font-size: 1.2rem; font-weight: 700; }
 
 .call-meta {
   display: flex;
@@ -520,17 +582,18 @@ button {
 }
 
 .call-shared-note {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  text-align: center;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
 .call-tiles {
+  position: relative;
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(96px, 1fr) minmax(84px, 0.8fr);
-  gap: 8px;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  min-height: 260px;
 }
 
 .tile {
@@ -543,11 +606,71 @@ button {
 }
 
 /* Same role palette as the Partner App call screen:
-   support agent violet, translator cyan-blue, customer (you) indigo-slate. */
-.tile--agent { background: linear-gradient(160deg, #5a5cff, #2d2e80); }
+   partner violet, translator cyan-blue, customer (you) indigo-slate. These show behind the photos
+   and when the camera is off. */
+.tile--partner { background: linear-gradient(160deg, #5a5cff, #2d2e80); }
 .tile--translator { background: linear-gradient(160deg, #1d86b0, #1b2f63); }
-.tile--self { grid-column: 1 / -1; background: linear-gradient(160deg, #34385e, #16162a); }
+.tile--self { background: linear-gradient(160deg, #34385e, #16162a); }
 .tile--camera-off { background: #101018; }
+
+/* The translator (main view) fills the stage; the partner and you are small views in the two bottom corners. */
+.tile--translator .tile-name { top: 8px; bottom: auto; }
+
+.tile--partner,
+.tile--self {
+  position: absolute;
+  bottom: 10px;
+  z-index: 1;
+  width: 30%;
+  min-width: 96px;
+  max-width: 170px;
+  aspect-ratio: 4 / 5;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+}
+
+/* Physical left / right corners, also in RTL. */
+.tile--partner { left: 10px; }
+.tile--self { right: 10px; }
+
+.tile--partner .tile-name,
+.tile--self .tile-name { font-size: 0.7rem; padding: 1px 6px; bottom: 4px; inset-inline-start: 4px; }
+.tile--partner .tile-avatar,
+.tile--self .tile-avatar { width: 36px; height: 36px; }
+.tile--partner .tile-avatar .icon,
+.tile--self .tile-avatar .icon { width: 20px; height: 20px; }
+
+.tile-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The main view must always show the translator's whole face. The tile shape varies a lot (very wide on desktop, almost
+   portrait on phones), so the photo is "contained" on wide tiles over a blurred copy of itself, and "covered" (cropped
+   around the face) on squarer ones. */
+.tile--translator { container-type: size; }
+.tile--translator[style*='--tile-photo']::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  background: var(--tile-photo) center / cover no-repeat;
+  filter: blur(22px) brightness(0.85);
+}
+.tile--translator .tile-photo { object-fit: cover; object-position: 9% 50%; }
+@container (min-aspect-ratio: 7 / 5) {
+  /* The image box is sized to the photo itself (954x578), so its edges can be feathered into the backdrop.
+     It sits right of centre so the face stays clear of the bottom-left corner tile. */
+  .tile--translator .tile-photo {
+    inset: 0 auto 0 calc((100cqw - 100cqh * 954 / 578) * 0.62);
+    width: calc(100cqh * 954 / 578);
+    height: 100%;
+    object-fit: fill;
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+}
 
 .tile-avatar {
   display: flex;
@@ -660,37 +783,155 @@ button {
   }
 }
 
+/* Lobby (before everyone has joined): amber pulsing dot + text, empty seats, status card over the cameras. */
+.call-status-dot--waiting {
+  background: var(--warning);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+.call-timer--waiting {
+  border-style: dashed;
+  border-color: rgb(255 255 255 / 0.35);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.tile--pending {
+  background: rgb(255 255 255 / 0.03);
+  outline: 2px dashed rgb(255 255 255 / 0.28);
+  outline-offset: -2px;
+}
+
+.tile--pending .tile-avatar { opacity: 0.7; border-style: dashed; }
+
+/* Corner seats sit over the translator's picture, so an empty seat needs a solid background. */
+.tile--partner.tile--pending,
+.tile--self.tile--pending { background: var(--surface); }
+
+/* The translator's name label is at the top-left: put the state chip on the other side. */
+.tile--translator .tile-state { inset-inline-start: auto; inset-inline-end: 8px; }
+
+.tile-state {
+  position: absolute;
+  top: 8px;
+  inset-inline-start: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(7 7 19 / 0.65);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.tile-state .icon { width: 14px; height: 14px; }
+.tile-state--connected .icon { color: var(--success); }
+
+.spinner--small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: rgb(255 255 255 / 0.25);
+  border-top-color: var(--cyan);
+}
+
+.call-stage { position: relative; }
+
+.call-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.call-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 440px;
+  padding: 22px 26px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(rgb(14 14 28 / 0.9), rgb(14 14 28 / 0.9)) padding-box,
+    var(--gradient) border-box;
+  box-shadow: 0 16px 50px rgb(0 0 0 / 0.55), 0 0 60px rgb(90 92 255 / 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  text-align: center;
+  animation: overlay-in 0.25s ease-out;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.call-overlay-card--started {
+  background:
+    linear-gradient(rgb(10 26 14 / 0.92), rgb(10 26 14 / 0.92)) padding-box,
+    linear-gradient(120deg, var(--success), var(--cyan)) border-box;
+  box-shadow: 0 16px 50px rgb(0 0 0 / 0.55), 0 0 60px rgb(32 212 0 / 0.25);
+}
+
+.call-overlay-icon { width: 40px; height: 40px; color: var(--success-text); }
+.call-overlay-title { font-size: 1.15rem; font-weight: 700; line-height: 1.35; }
+.call-overlay-text { color: #c9c9d6; font-size: 0.9rem; }
+
+.call-page .tile--partner .tile-state,
+.call-page .tile--self .tile-state { top: 6px; inset-inline-start: 6px; font-size: 0.7rem; padding: 1px 8px; }
+
 /* =========================================================
-   Enlarged panel (header "Enlarge window" button)
-   Text screens stay a readable width; the call gets bigger tiles.
+   Separate call page (/call)
+   Reuses the panel layout (header, screens, call) at full page size.
    ========================================================= */
-.panel--expanded .screen-content,
-.panel--expanded .screen-actions {
+.call-page {
+  width: 100%;
+  height: 100dvh;
+  animation: none;
+}
+
+/* Text screens stay a readable width; the call gets big tiles. */
+.call-page .screen-content,
+.call-page .screen-actions {
   width: 100%;
   max-width: 640px;
   margin-inline: auto;
 }
 
-.panel--expanded .screen-actions { border-top: 0; }
+.call-page .screen-actions { border-top: 0; }
 
-.panel--expanded .call-header,
-.panel--expanded .call-controls { padding-inline: 24px; }
+.call-page .call-header,
+.call-page .call-controls { padding-inline: 24px; }
 
-.panel--expanded .call-stage { margin-inline: 24px; padding: 14px; border-radius: var(--radius-lg); }
+.call-page .call-stage { margin-inline: 24px; padding: 14px; border-radius: var(--radius-lg); }
 
-/* Support agent and translator large, customer self-view a bit smaller. */
-.panel--expanded .call-tiles {
-  grid-template-columns: 1fr 1fr 0.7fr;
-  grid-template-rows: minmax(200px, 1fr);
-  gap: 12px;
-}
+/* The translator gets the whole stage; the partner and you are bigger corner views. */
+.call-page .call-tiles { min-height: 360px; }
+.call-page .tile { border-radius: var(--radius); }
 
-.panel--expanded .tile { border-radius: var(--radius); }
-.panel--expanded .tile--self { grid-column: auto; }
+.call-page .tile--partner,
+.call-page .tile--self { bottom: 16px; width: 22%; max-width: 240px; }
+.call-page .tile--partner { left: 16px; }
+.call-page .tile--self { right: 16px; }
 
-.panel--expanded .tile-avatar { width: 96px; height: 96px; }
-.panel--expanded .tile-avatar .icon { width: 44px; height: 44px; }
-.panel--expanded .tile-name { font-size: 0.95rem; padding: 5px 12px; }
+.call-page .tile--partner .tile-name,
+.call-page .tile--self .tile-name { font-size: 0.8rem; padding: 2px 8px; }
+
+.call-page .tile--translator .tile-avatar { width: 96px; height: 96px; }
+.call-page .tile--translator .tile-avatar .icon { width: 44px; height: 44px; }
+.call-page .tile--translator .tile-name { font-size: 0.95rem; padding: 4px 10px; }
 
 /* =========================================================
    Call rating (call ended screen)
@@ -743,4 +984,69 @@ button {
   color: var(--success-text);
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+/* =========================================================
+   Confirmation dialog (same look in the widget, the Partner App and the Translator app)
+   ========================================================= */
+.dialog {
+  width: min(340px, calc(100vw - 32px));
+  padding: 20px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  color: #0f1b2d;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
+}
+
+.dialog::backdrop {
+  background: rgb(8 12 22 / 0.6);
+}
+
+.dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dialog-text {
+  margin: 0 0 18px;
+  color: #566274;
+  font-size: 0.9375rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-button {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dialog-button--cancel {
+  background: #fff;
+  border-color: #b8c1cf;
+  color: #0f1b2d;
+}
+
+.dialog-button--cancel:hover {
+  background: #f1f4f8;
+}
+
+.dialog-button--confirm {
+  background: #c62828;
+  color: #fff;
+}
+
+.dialog-button--confirm:hover {
+  background: #a91f1f;
 }

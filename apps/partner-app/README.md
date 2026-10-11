@@ -40,12 +40,14 @@ All data (companies, consultants, call history) is shared in memory between the 
    - A consultant only ever receives calls for their **own company**; there are no branches. The simulated call always comes from the consultant's company widget, and the dashboard and history only list the calls this consultant handled.
    - If the status is not *Available*, the call is not routed to Sarah.
    - **Decline** rejects the call. It stops the ringtone and the notification, and logs the call in the history as *Declined*. No banner is shown; a screen reader announces the decline.
-4. **Join call.** Opens the call screen in a **lobby**. A status panel in the **middle of the camera view** shows what is happening. At the start: PWD User and Sarah (you) are connected, and the call is **not started yet** (*Not started*, *Waiting for all participants · 2 of 3 joined*, dashed stage). The partner status becomes *Busy*, and the navigation is hidden.
-5. **Translator joins automatically.** There is no button to press. The status goes from *Looking for an available translator…* (~2 s) to *Translator found: Ahmed Ali. Connecting…* (~1.5 s).
+4. **Join call.** Opens the call screen in a **lobby**. A status panel in the **middle of the camera view** shows what is happening. At the start only Sarah (you) is in the room, and the call is **not started yet** (*Not started*, *Waiting for all participants · 1 of 3 joined*, dashed stage). The partner status becomes *Busy*, and the navigation is hidden.
+5. **The others join automatically**, one after the other, 4 seconds apart. There is no button to press. First the user (*Waiting for the user to join…* → *The user is joining…*, joined after about 4 s), then the translator (*Looking for an available translator…* → *Translator found: Ahmed Ali. Connecting…*, joined after about 8 s in total).
+   **No video before the call starts:** until all three are in the room, nobody's picture is shown; people who have joined appear as avatars marked *Joined*, and the pictures only appear when the call starts.
+   **Layout** (same as the PWD widget's call page): the PWD user is the large main view; the translator (bottom left) and you (bottom right) are smaller views in the corners. Everyone shows a still photo once the call has started (`public/images`); with the camera off, an avatar.
    **The call only starts once all three roles are present:** the panel briefly confirms *All participants joined. The call has started.*, the timer starts, the status becomes *Connected · 3 participants*, and the start is announced to screen readers. This matches the widget's one-call rule.
 6. **Mute / Camera.** These are visual-only toggles, available in the lobby and during the call.
-7. **End call.** A confirmation dialog opens (*End this call?* with Cancel / End call). After you confirm, you go back to the Dashboard with an *Available* status. No "call ended" message is shown, and the call appears in *Recent calls* and *History*.
-   In the lobby, the red button is **Leave** (*Leave before the call starts?*). Leaving cancels the call, and it is saved in the history as *Cancelled*.
+7. **End call.** A confirmation dialog opens (*End this call?* with Cancel / End call). After you confirm, a **Call ended** screen opens with a 1–5 star rating, the same as for the PWD in the widget (frontend only, the rating is not stored); *Close* takes you to the Dashboard with an *Available* status. The call appears in *Recent calls* and *History*.
+   In the lobby, the red button is **Leave** (*Leave before the call starts?*). Leaving cancels the call (no rating screen; the Dashboard shows a short notice), and it is saved in the history as *Cancelled*.
 8. **History.** Each call shows date, duration, call ID and its result: *Completed*, *Cancelled* or *Declined*. There is no translator yes/no field, because a call only runs with a translator. The call language is not stored in the history.
 
 Switch **EN | العربية** at any point, including during a call. The whole layout switches to RTL, and the current screen and call state are kept. The language choice is saved in `localStorage`.
@@ -55,7 +57,7 @@ Switch **EN | العربية** at any point, including during a call. The whole 
 Sign in with `admin` and any password.
 
 - **Companies.** One table: company, number of consultants, completed calls. **Add company** (next to the title) opens a separate page with the company name; *Create company* generates its key (`twc_live_…`, what links the company's PWD widget to it) and takes you to the new company's page. Duplicate names are rejected.
-- **A company** (click its name; you also land here right after adding one): one summary line (completed calls, total and average call time), then two columns: **Consultants** (the add form first, as one row: first name, last name, email, *Add*; the list under it) and **Widget installation**. On narrower screens the columns stack.
+- **A company** (click its name; you also land here right after adding one): one summary line (completed calls, total and average call time), then three sections as **tabs** (keyboard: arrow keys, Home, End): **Consultants** (with a count; the person responsible, then the list, and the add form last, as one row: first name, last name, email, *Add*), **Monthly report** and **Widget installation**. A half-filled form is kept when you switch tabs.
   - **Embed script**: a ready-to-send snippet with the company key, with *Copy script*. The company pastes it before `</body>` on its website; the `data-company-key` attribute tells us which company each call comes from:
 
     ```html
@@ -70,7 +72,9 @@ Sign in with `admin` and any password.
     The script address is a placeholder (`.example` is a reserved domain); set `VITE_WIDGET_SCRIPT_URL` in `apps/partner-app/.env.local` to change it. The loader `embed.js` itself is not part of this POC yet: the bank website still embeds the widget with its own iframe.
   - **Company key** on its own, with *Copy key*.
   - **Assign consultant**: first name, last name and email (all required); the company is the one you are on. The consultant can then sign in to the Partner Portal with that email and receives all of this company's calls. An email can belong to only one consultant.
+  - **Person responsible for consultants**: the company contact saved in *Monthly report* (a single contact per company; Al Rawdah Bank has one, Najd Insurance and Sahl Telecom do not, so there the section links to *Monthly report*). Each consultant has a **Send access details** button, which sends their sign-in details to this contact, who passes them on; it stays disabled until a contact is saved. The message holds the portal address, the consultant's login (email) and a link to set a password; no password is ever sent in plain text. The row then shows *Access details sent on …*. Demo only: nothing is really e-mailed.
   - **Remove** a consultant (with confirmation). Their past calls stay in the statistics.
+  - **Monthly report.** The company's single contact (*contact name* and *contact email*; it also receives the consultants' access details), plus a checkbox *Send the report automatically every month*. The report covers the previous calendar month and is sent on the 1st: who handled the calls (per consultant: completed, cancelled, declined, total time), totals, and the list of all calls in the month. The card shows the next send date and a **preview** for any month that has calls (the period selector); *Send test report* only confirms on screen. Demo only: nothing is really e-mailed, and the contact is kept in memory like the rest. Al Rawdah Bank has a contact already, the other companies have none.
 - **Statistics.** Three numbers (completed calls, total call time, average call), then the same per company in a table. A completed call is one where the PWD user, the consultant and the translator all joined; only completed calls count towards call time.
 
 Calls made in the Partner Portal appear in the statistics straight away. Example: add a company, assign a consultant, log out, sign in as that consultant, take a call, log out, sign in as `admin` again.
@@ -112,7 +116,7 @@ src/
 ├── App.tsx                 # flow state: session, page, incoming/active call, history, language
 ├── components/             # Header, LanguageSwitcher, StatusSwitch, StatusBadge, OutcomeBadge, IncomingCall,
 │                           # ParticipantCard, CallControls, ConfirmDialog, Notice, icons
-├── pages/                  # Login, Dashboard, Call, History, Profile; Admin/ (AdminApp, Companies, Company, Statistics)
+├── pages/                  # Login, Dashboard, Call, CallEnded (rating), History, Profile; Admin/ (AdminApp, Companies, Company, Statistics)
 ├── mock/                   # companies + consultants, partner (mock login), calls (+ routing), translator
 ├── i18n/                   # en.ts, ar.ts — all UI text, no hardcoded strings in components
 ├── types/                  # shared TypeScript types

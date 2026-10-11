@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CallRecord, Company, Consultant, IncomingCall, Language, Page, Partner, PartnerStatus } from './types';
+import type {
+  CallRecord,
+  Company,
+  Consultant,
+  IncomingCall,
+  Language,
+  Page,
+  Partner,
+  PartnerStatus,
+  ReportSettings,
+} from './types';
 import { getDirection, translations } from './i18n';
 import { createIncomingCall, getRoutingResult, initialCallHistory } from './mock/calls';
 import { createId, generateCompanyKey, initialCompanies, initialConsultants } from './mock/companies';
@@ -18,6 +28,7 @@ import AdminApp from './pages/Admin/AdminApp';
 import LoginPage from './pages/Login/LoginPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import CallPage, { type CallResult } from './pages/Call/CallPage';
+import CallEndedPage from './pages/CallEnded/CallEndedPage';
 import HistoryPage from './pages/History/HistoryPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 
@@ -144,6 +155,16 @@ export default function App() {
     setConsultants((current) => current.filter((c) => c.id !== consultantId));
   }
 
+  function saveReportSettings(companyId: string, settings: ReportSettings | undefined) {
+    setCompanies((current) => current.map((c) => (c.id === companyId ? { ...c, reportSettings: settings } : c)));
+  }
+
+  /** Mock: records that the access details were sent; nothing is really e-mailed. */
+  function sendAccessDetails(consultantId: string) {
+    const sentAt = new Date().toISOString();
+    setConsultants((current) => current.map((c) => (c.id === consultantId ? { ...c, accessSentAt: sentAt } : c)));
+  }
+
   function handleLogout() {
     stopAlerting();
     if (pendingCallTimeout.current !== null) window.clearTimeout(pendingCallTimeout.current);
@@ -249,7 +270,8 @@ export default function App() {
     // A normally finished call needs no message; only a call cancelled from the lobby is explained.
     setEndedCall(started ? null : record);
     setPartner((current) => (current ? { ...current, status: 'AVAILABLE' } : current));
-    setPage('dashboard');
+    // A call that ran gets the "Call ended" + rating screen (like the PWD); a cancelled one goes back with a notice.
+    setPage(started ? 'callEnded' : 'dashboard');
   }
 
   function renderPage(currentPartner: Partner) {
@@ -270,6 +292,8 @@ export default function App() {
             onEndCall={endCall}
           />
         ) : null;
+      case 'callEnded':
+        return <CallEndedPage t={t} onClose={() => navigate('dashboard')} />;
       case 'history':
         return <HistoryPage t={t} language={language} history={ownHistory} />;
       case 'profile':
@@ -315,6 +339,8 @@ export default function App() {
           onCreateCompany={createCompany}
           onAssignConsultant={assignConsultant}
           onRemoveConsultant={removeConsultant}
+          onSaveReportSettings={saveReportSettings}
+          onSendAccessDetails={sendAccessDetails}
           onLogout={handleLogout}
           onAnnounce={announce}
         />
@@ -335,7 +361,7 @@ export default function App() {
               { key: 'history' as const, label: t.navHistory, icon: <HistoryIcon /> },
               { key: 'profile' as const, label: t.navProfile, icon: <UserIcon /> },
             ]}
-            currentKey={page === 'call' ? null : page}
+            currentKey={page === 'call' || page === 'callEnded' ? null : page}
             onNavigate={navigate}
             onLogout={handleLogout}
             inCall={page === 'call'}

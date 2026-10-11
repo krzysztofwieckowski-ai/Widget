@@ -7,7 +7,7 @@ type Props = { t: Translation; onBack: () => void; onStartCall: () => void };
 
 /**
  * Explains the fixed assistance model. Nothing here is selectable:
- * the support agent and translator always come together.
+ * the partner and the translator always come together. "Start video call" takes the customer to the call page.
  */
 export default function AssistanceRequestScreen({ t, onBack, onStartCall }: Props) {
   return (
@@ -27,12 +27,12 @@ export default function AssistanceRequestScreen({ t, onBack, onStartCall }: Prop
 
       <ul className="people-list">
         <li className="person-card">
-          <span className="person-icon person-icon--agent">
+          <span className="person-icon person-icon--partner">
             <HeadsetIcon />
           </span>
           <span>
-            <strong className="person-name">{t.agent}</strong>
-            <span className="person-description">{t.agentDescription}</span>
+            <strong className="person-name">{t.partner}</strong>
+            <span className="person-description">{t.partnerDescription}</span>
           </span>
         </li>
         <li className="people-plus" aria-hidden="true">
@@ -48,8 +48,6 @@ export default function AssistanceRequestScreen({ t, onBack, onStartCall }: Prop
           </span>
         </li>
       </ul>
-
-      <p className="screen-note">{t.requestNote}</p>
 
       <div className="info-row">
         <VideoIcon />

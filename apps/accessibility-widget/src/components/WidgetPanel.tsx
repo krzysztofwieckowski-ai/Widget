@@ -2,29 +2,24 @@ import type { KeyboardEvent, ReactNode, Ref } from 'react';
 import type { Language } from '../types';
 import type { Translation } from '../i18n';
 import LanguageSwitcher from './LanguageSwitcher';
-import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
+import { CloseIcon } from './icons';
 
 type WidgetPanelProps = {
   t: Translation;
   language: Language;
   onLanguageChange: (language: Language) => void;
   onClose: () => void;
-  isExpanded: boolean;
-  /** Omitted on phones, where the panel is already full screen. */
-  onToggleExpand?: () => void;
   hidden: boolean;
   children: ReactNode;
   ref?: Ref<HTMLDivElement>;
 };
 
-/** Panel frame shared by every step: header with title, language toggle, enlarge and close buttons. */
+/** Panel frame shared by every step: header with title, language toggle and close button. */
 export default function WidgetPanel({
   t,
   language,
   onLanguageChange,
   onClose,
-  isExpanded,
-  onToggleExpand,
   hidden,
   children,
   ref,
@@ -33,12 +28,10 @@ export default function WidgetPanel({
     if (event.key === 'Escape') onClose();
   }
 
-  const expandLabel = isExpanded ? t.restoreWidget : t.expandWidget;
-
   return (
     <div
       ref={ref}
-      className={`panel${isExpanded ? ' panel--expanded' : ''}`}
+      className="panel"
       role="dialog"
       aria-labelledby="panel-title"
       hidden={hidden}
@@ -49,17 +42,6 @@ export default function WidgetPanel({
           {t.widgetTitle}
         </h1>
         <LanguageSwitcher language={language} onChange={onLanguageChange} tooltip={t.changeLanguage} />
-        {onToggleExpand && (
-          <button
-            type="button"
-            className="icon-button"
-            aria-label={expandLabel}
-            title={expandLabel}
-            onClick={onToggleExpand}
-          >
-            {isExpanded ? <CollapseIcon /> : <ExpandIcon />}
-          </button>
-        )}
         <button
           type="button"
           className="icon-button"

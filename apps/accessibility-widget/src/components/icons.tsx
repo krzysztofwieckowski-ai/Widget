@@ -149,23 +149,6 @@ export function ChevronForwardIcon(props: IconProps) {
   );
 }
 
-export function ExpandIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
-    </Icon>
-  );
-}
-
-export function CollapseIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7" />
-    </Icon>
-  );
-}
-
-/** Filled vs. outlined shape shows the state, not colour alone. */
 export function StarIcon({ filled, ...props }: IconProps & { filled: boolean }) {
   return (
     <Icon {...props}>

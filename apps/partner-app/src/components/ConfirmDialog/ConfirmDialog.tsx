@@ -50,10 +50,10 @@ export default function ConfirmDialog({
         {description}
       </p>
       <div className="dialog-actions">
-        <button type="button" className="button button--secondary" onClick={onCancel} autoFocus>
+        <button type="button" className="dialog-button dialog-button--cancel" onClick={onCancel} autoFocus>
           {cancelLabel}
         </button>
-        <button type="button" className="button button--danger" onClick={onConfirm}>
+        <button type="button" className="dialog-button dialog-button--confirm" onClick={onConfirm}>
           {confirmLabel}
         </button>
       </div>

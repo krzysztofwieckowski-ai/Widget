@@ -35,3 +35,9 @@ export function formatLongDuration(
   const seconds = totalSeconds % 60;
   return hours > 0 ? units.hoursMinutes(hours, minutes) : units.minutesSeconds(minutes, seconds);
 }
+
+/** "2026-09" → "September 2026" (month and year only, for the monthly report). */
+export function formatMonth(monthKey: string, language: Language) {
+  const [year, month] = monthKey.split('-').map(Number);
+  return new Intl.DateTimeFormat(LOCALES[language], { month: 'long', year: 'numeric' }).format(new Date(year, month - 1, 1));
+}

@@ -6,32 +6,20 @@ import Launcher from './components/Launcher';
 import WidgetPanel from './components/WidgetPanel';
 import WelcomeScreen from './screens/WelcomeScreen';
 import AssistanceRequestScreen from './screens/AssistanceRequestScreen';
-import WaitingScreen from './screens/WaitingScreen';
-import VideoCallScreen from './screens/VideoCallScreen';
-import CallEndedScreen from './screens/CallEndedScreen';
-import UnavailableScreen from './screens/UnavailableScreen';
-import { isAssistanceAvailable } from './demoScenario';
-
-// Simulated time to "prepare" the support agent and translator. No real availability check:
-// the result comes from the demo scenario (see demoScenario.ts).
-const WAITING_TIME_MS = 2000;
-
-// On phones the open panel is already full screen, so the enlarge button is not shown.
-const CAN_EXPAND = window.screen.width > 480;
+import { goToCallPage } from './callNavigation';
 
 /**
- * Flow: closed → welcome → request → waiting → call → ended → closed
- *                                              ↘ unavailable (no agent + translator) → closed
+ * Flow in the widget: closed → welcome → request → (call page)
  *
- * The panel stays mounted while closed (just hidden), so closing and reopening
- * mid-flow keeps the customer where they were. Language is separate state,
+ * "Start video call" takes the customer to the separate call page (/call), where waiting, the call,
+ * the rating and the "unavailable" demo scenario happen. The panel stays mounted while closed (just hidden),
+ * so closing and reopening keeps the customer where they were. Language is separate state,
  * so switching it never resets the flow.
  */
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>('welcome');
   const [language, setLanguage] = useState<Language>('ar');
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
@@ -45,10 +33,10 @@ export default function App() {
     document.documentElement.dir = getDirection(language);
   }, [language]);
 
-  // Tell the host page to resize the iframe whenever the widget opens, closes or is enlarged.
+  // Tell the host page to resize the iframe whenever the widget opens or closes.
   useEffect(() => {
-    notifyHost(isOpen, isExpanded);
-  }, [isOpen, isExpanded]);
+    notifyHost(isOpen);
+  }, [isOpen]);
 
   // Focus management: move focus to the current screen heading when the panel opens
   // or the step changes; return focus to the launcher after the customer closes the panel.
@@ -61,17 +49,6 @@ export default function App() {
     }
   }, [isOpen, step]);
 
-  // Simulated waiting: after ~2 seconds either the shared call opens automatically,
-  // or (demo scenario) nobody is available and no call is started.
-  useEffect(() => {
-    if (step !== 'waiting') return;
-    const timeoutId = window.setTimeout(
-      () => setStep(isAssistanceAvailable ? 'call' : 'unavailable'),
-      WAITING_TIME_MS,
-    );
-    return () => window.clearTimeout(timeoutId);
-  }, [step]);
-
   function openWidget() {
     setIsOpen(true);
   }
@@ -79,8 +56,6 @@ export default function App() {
   function closeWidget() {
     shouldFocusLauncher.current = true;
     setIsOpen(false);
-    // A finished call or a failed request starts fresh next time.
-    if (step === 'ended' || step === 'unavailable') setStep('welcome');
   }
 
   function renderStep() {
@@ -92,17 +67,9 @@ export default function App() {
           <AssistanceRequestScreen
             t={t}
             onBack={() => setStep('welcome')}
-            onStartCall={() => setStep('waiting')}
+            onStartCall={() => goToCallPage(language)}
           />
         );
-      case 'waiting':
-        return <WaitingScreen t={t} onCancel={() => setStep('request')} />;
-      case 'call':
-        return <VideoCallScreen t={t} onEndCall={() => setStep('ended')} />;
-      case 'ended':
-        return <CallEndedScreen t={t} onClose={closeWidget} />;
-      case 'unavailable':
-        return <UnavailableScreen t={t} onTryAgain={() => setStep('waiting')} onClose={closeWidget} />;
     }
   }
 
@@ -115,8 +82,6 @@ export default function App() {
         language={language}
         onLanguageChange={setLanguage}
         onClose={closeWidget}
-        isExpanded={isExpanded}
-        onToggleExpand={CAN_EXPAND ? () => setIsExpanded((expanded) => !expanded) : undefined}
         hidden={!isOpen}
       >
         {renderStep()}

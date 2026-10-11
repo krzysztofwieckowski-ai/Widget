@@ -33,4 +33,13 @@ export const initialCallHistory: CallRecord[] = [
   { callId: 'CALL-091', endedAt: '2026-10-02T13:10:00', companyId: 'company-001', consultantId: 'consultant-002', durationSeconds: 0, outcome: 'CANCELLED' },
   { callId: 'CALL-090', endedAt: '2026-10-02T08:30:00', companyId: 'company-001', consultantId: 'consultant-001', durationSeconds: 0, outcome: 'DECLINED' },
   { callId: 'CALL-089', endedAt: '2026-10-01T12:12:00', companyId: 'company-002', consultantId: 'consultant-003', durationSeconds: minutes(11, 12), outcome: 'COMPLETED' },
+  { callId: 'CALL-088', endedAt: '2026-09-29T14:05:00', companyId: 'company-001', consultantId: 'consultant-001', durationSeconds: minutes(7, 20), outcome: 'COMPLETED' },
+  { callId: 'CALL-087', endedAt: '2026-09-25T10:30:00', companyId: 'company-002', consultantId: 'consultant-003', durationSeconds: minutes(5, 45), outcome: 'COMPLETED' },
+  { callId: 'CALL-086', endedAt: '2026-09-22T16:12:00', companyId: 'company-001', consultantId: 'consultant-002', durationSeconds: minutes(10, 2), outcome: 'COMPLETED' },
+  { callId: 'CALL-085', endedAt: '2026-09-18T09:40:00', companyId: 'company-001', consultantId: 'consultant-001', durationSeconds: 0, outcome: 'CANCELLED' },
+  { callId: 'CALL-084', endedAt: '2026-09-15T13:25:00', companyId: 'company-001', consultantId: 'consultant-001', durationSeconds: minutes(9, 10), outcome: 'COMPLETED' },
+  { callId: 'CALL-083', endedAt: '2026-09-11T11:50:00', companyId: 'company-002', consultantId: 'consultant-003', durationSeconds: minutes(13, 30), outcome: 'COMPLETED' },
+  { callId: 'CALL-082', endedAt: '2026-09-08T15:15:00', companyId: 'company-001', consultantId: 'consultant-002', durationSeconds: minutes(6, 5), outcome: 'COMPLETED' },
+  { callId: 'CALL-081', endedAt: '2026-09-04T10:05:00', companyId: 'company-001', consultantId: 'consultant-002', durationSeconds: 0, outcome: 'DECLINED' },
+  { callId: 'CALL-080', endedAt: '2026-09-02T12:45:00', companyId: 'company-001', consultantId: 'consultant-001', durationSeconds: minutes(11, 40), outcome: 'COMPLETED' },
 ];

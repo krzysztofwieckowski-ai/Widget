@@ -7,17 +7,16 @@ import { AccessibilityIcon } from '../components/icons';
 type Props = { t: Translation; onRequest: () => void };
 
 /**
- * Mock sign-in: any non-empty username and password are accepted.
- * Nothing is sent or stored anywhere - it only exists so the flow starts with a login step.
+ * First screen: no sign-in, the only thing we ask for is the user's name.
+ * Nothing is sent or stored anywhere in this prototype.
  */
 export default function WelcomeScreen({ t, onRequest }: Props) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showError, setShowError] = useState(false);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (username.trim() && password) {
+    if (name.trim()) {
       onRequest();
     } else {
       setShowError(true);
@@ -29,41 +28,29 @@ export default function WelcomeScreen({ t, onRequest }: Props) {
       title={t.welcomeTitle}
       icon={<AccessibilityIcon />}
       actions={
-        <button type="submit" form="login-form" className="button button--primary button--full">
-          {t.signInButton}
+        <button type="submit" form="name-form" className="button button--primary button--full">
+          {t.welcomeButton}
         </button>
       }
     >
       <p className="screen-text">{t.welcomeDescription}</p>
 
-      <form id="login-form" className="login-form" onSubmit={handleSubmit} noValidate>
+      <form id="name-form" className="name-form" onSubmit={handleSubmit} noValidate>
         <div className="field">
-          <label htmlFor="login-username">{t.usernameLabel}</label>
+          <label htmlFor="user-name">{t.nameLabel}</label>
           <input
-            id="login-username"
+            id="user-name"
             type="text"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            aria-invalid={showError && !username.trim()}
-            aria-describedby={showError ? 'login-error' : undefined}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="login-password">{t.passwordLabel}</label>
-          <input
-            id="login-password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-invalid={showError && !password}
-            aria-describedby={showError ? 'login-error' : undefined}
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            aria-invalid={showError && !name.trim()}
+            aria-describedby={showError ? 'name-error' : undefined}
           />
         </div>
         {showError && (
-          <p id="login-error" className="field-error" role="alert">
-            {t.signInError}
+          <p id="name-error" className="field-error" role="alert">
+            {t.nameError}
           </p>
         )}
       </form>

@@ -6,9 +6,11 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently -n bank,widget -c blue,magenta \"npm run dev -w bank-website\" \"npm run dev -w accessibility-widget\"",
+    "dev": "concurrently -n bank,widget,partner,translator -c blue,magenta,green,yellow \"npm run dev -w bank-website\" \"npm run dev -w accessibility-widget\" \"npm run dev -w partner-app\" \"npm run dev -w translator-app\"",
     "dev:bank": "npm run dev -w bank-website",
     "dev:widget": "npm run dev -w accessibility-widget",
+    "dev:partner": "npm run dev -w partner-app",
+    "dev:translator": "npm run dev -w translator-app",
     "build": "npm run build --workspaces",
     "typecheck": "npm run typecheck --workspaces"
   },

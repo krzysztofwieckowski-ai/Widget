@@ -1,30 +1,47 @@
 /* =========================================================
-   Design tokens
-   Green/orange palette inspired by (not copied from) DGA.
+   Design tokens — the same dark, Takamol-inspired theme as the Partner App
+   (apps/partner-app): navy background, dark cards, violet brand colour,
+   violet → indigo → cyan gradient, pill buttons, cyan focus ring.
+   Contrast: every text colour is ≥ 4.5:1 on --bg and --surface; the brand
+   violet is only used for fills/borders, --brand-text for text.
    ========================================================= */
 :root {
-  --green: #127a4b;        /* primary — 5.3:1 contrast with white */
-  --green-dark: #0b5c38;
-  --green-light: #e8f4ee;
-  --orange: #e07a16;       /* accent — decorative use only */
-  --orange-light: #fdf1e5;
-  --focus: #b35900;        /* focus ring on light surfaces */
-  --focus-on-dark: #ffb547;
-  --danger: #c62828;
-  --danger-dark: #a31f1f;
+  --bg: #070713;
+  --surface: #14141a;
+  --surface-raised: #1c1c26;
+  --border: #313131;
+  --border-strong: #6b6b78;
 
-  --text: #1c2b24;
-  --text-muted: #4b5a53;
-  --surface: #ffffff;
-  --surface-muted: #f4f7f5;
-  --border: #d5ded9;
+  --brand: #5a5cff;            /* white text on it: 4.8:1 */
+  --brand-hover: #4336f5;
+  --brand-text: #9d9eff;
+  --brand-soft: rgb(90 92 255 / 0.18);
+  --cyan: #15d3ff;
+  --cyan-text: #7fe3ff;
+  --gradient: linear-gradient(120deg, #a082fb 0%, #5a5cff 50%, #15d3ff 100%);
 
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
+  --success: #20d400;
+  --success-text: #7be86d;
+  --warning: #f69b31;
+  --warning-text: #f8b468;
+  --danger: #e0242b;           /* white text on it: 4.6:1 */
+  --danger-hover: #c41a20;
+  --danger-text: #ff9b9b;
+  --focus: #15d3ff;
 
+  --text: #ffffff;
+  --text-muted: #a6a6b3;
+
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* The document stays "light" so the iframe canvas remains transparent around the
+     round launcher; only the panel switches to the dark scheme (see .panel). */
   color-scheme: light;
-  font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Arabic', 'Geeza Pro', Tahoma, sans-serif;
+  font-family: 'FrutigerLTArabic', 'Frutiger', system-ui, -apple-system, 'Segoe UI', 'Noto Sans Arabic',
+    'Geeza Pro', Tahoma, sans-serif;
   color: var(--text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -49,6 +66,7 @@ ul { padding: 0; list-style: none; }
 
 button {
   font: inherit;
+  color: inherit;
   cursor: pointer;
 }
 
@@ -95,7 +113,7 @@ button {
   position: fixed;
   right: 24px;
   bottom: 24px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.2);
+  box-shadow: 0 16px 40px rgb(7 7 19 / 0.45);
 }
 
 .widget--standalone .launcher {
@@ -110,11 +128,6 @@ button {
   overflow: hidden;
 }
 
-.widget--standalone .panel--expanded {
-  width: min(1100px, calc(100vw - 48px));
-  height: calc(100dvh - 48px);
-}
-
 @media (max-width: 480px) {
   .widget--standalone .panel {
     inset: 0;
@@ -125,7 +138,7 @@ button {
 }
 
 /* =========================================================
-   Launcher
+   Launcher — gradient circle, like the Partner App brand mark
    ========================================================= */
 .launcher {
   display: flex;
@@ -134,17 +147,17 @@ button {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--gradient);
   color: #fff;
-  transition: background-color 0.15s ease;
+  transition: filter 0.15s ease;
 }
 
-.launcher:hover { background: var(--green-dark); }
+.launcher:hover { filter: brightness(1.12); }
 
 /* Inset ring so it is not clipped by the round iframe edge. */
 .launcher:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 3px var(--focus-on-dark), inset 0 0 0 5px var(--green-dark);
+  box-shadow: inset 0 0 0 3px var(--focus), inset 0 0 0 5px var(--bg);
 }
 
 .launcher-icon {
@@ -156,9 +169,14 @@ button {
    Panel frame
    ========================================================= */
 .panel {
+  color-scheme: dark;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background:
+    radial-gradient(26rem 18rem at 0% 0%, rgb(90 92 255 / 0.28), transparent 65%),
+    radial-gradient(22rem 16rem at 100% 0%, rgb(21 211 255 / 0.12), transparent 65%),
+    var(--bg);
+  color: var(--text);
   animation: panel-in 0.2s ease-out;
 }
 
@@ -167,36 +185,34 @@ button {
   to { opacity: 1; transform: none; }
 }
 
+/* Glass header with a thin brand-gradient line underneath. */
 .panel-header {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   padding-block: 10px;
-  padding-inline: 16px 8px;
-  background: var(--green);
-  color: #fff;
-  border-bottom: 3px solid var(--orange);
+  padding-inline: 18px 8px;
+  background: rgb(30 30 48 / 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-.panel-header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.16);
+.panel-header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gradient);
+  opacity: 0.85;
 }
-
-.panel-header-icon .icon { width: 22px; height: 22px; }
 
 .panel-title {
   flex: 1;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
 }
-
-.panel-header :focus-visible { outline-color: #fff; }
 
 .icon-button {
   display: flex;
@@ -206,20 +222,12 @@ button {
   height: 44px;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: inherit;
 }
 
-.icon-button:hover { background: rgb(255 255 255 / 0.16); }
-
-.panel-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  background: var(--surface-muted);
-  border-bottom: 1px solid var(--border);
-}
+.icon-button:hover { background: rgb(255 255 255 / 0.1); }
 
 .panel-body {
   flex: 1;
@@ -229,39 +237,24 @@ button {
   flex-direction: column;
 }
 
-/* =========================================================
-   Language switcher
-   Active option: filled + bold + underline (not colour alone).
-   ========================================================= */
-.language-switcher {
-  display: flex;
-  padding: 3px;
-  gap: 3px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-}
-
-.language-option {
-  min-width: 76px;
+/* Compact language toggle in the header (shows the other language). */
+.language-toggle {
   min-height: 36px;
-  padding: 4px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
-.language-option:hover { background: var(--green-light); }
-
-.language-option[aria-pressed='true'] {
-  background: var(--green);
+  padding: 2px 14px;
+  margin-inline-end: 4px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: var(--radius-pill);
+  background: rgb(237 243 255 / 0.06);
   color: #fff;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
+
+.language-toggle:hover { background: rgb(237 243 255 / 0.14); }
+
+/* Arabic script reads smaller at the same size. */
+.language-toggle:lang(ar) { font-size: 0.95rem; }
 
 /* =========================================================
    Screen layout (shared by every flow step except the call)
@@ -288,15 +281,22 @@ button {
   height: 64px;
   margin-bottom: 4px;
   border-radius: 50%;
-  background: var(--green-light);
-  color: var(--green);
+  background: var(--gradient);
+  color: #fff;
+}
+
+.screen-icon--warning {
+  background: rgb(246 155 49 / 0.16);
+  color: var(--warning-text);
+  box-shadow: inset 0 0 0 2px rgb(246 155 49 / 0.45);
 }
 
 .screen-icon .icon { width: 34px; height: 34px; }
 
 .screen-title {
-  font-size: 1.35rem;
-  line-height: 1.3;
+  font-size: 1.45rem;
+  line-height: 1.25;
+  font-weight: 700;
 }
 
 .screen-text {
@@ -309,40 +309,14 @@ button {
   font-size: 0.9rem;
 }
 
-/* Mock sign-in form (welcome screen) */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-.field { display: flex; flex-direction: column; gap: 4px; }
-
-.field label { font-size: 0.9rem; font-weight: 600; }
-
-.field input {
-  font: inherit;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid #6b7a73;
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-}
-
-.field input[aria-invalid='true'] { border-color: var(--danger); border-width: 2px; }
-
-.field-error { color: var(--danger-dark); font-size: 0.9rem; font-weight: 600; }
-
 .screen-actions {
   display: flex;
   gap: 10px;
   padding: 12px 20px 20px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgb(255 255 255 / 0.1);
   position: sticky;
   bottom: 0;
-  background: var(--surface);
+  background: var(--bg);
 }
 
 .screen-actions .button { flex: 1; }
@@ -350,39 +324,65 @@ button {
 /* Back stays compact so the main action has room for its label. */
 .screen-actions .button--secondary:not(.button--full) { flex: 0 0 auto; }
 
+/* Name field on the first screen. */
+.name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field label { font-size: 0.9rem; font-weight: 700; }
+
+.field input {
+  font: inherit;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field input[aria-invalid='true'] { border-color: var(--danger-text); border-width: 2px; }
+
+.field-error { color: var(--danger-text); font-size: 0.9rem; font-weight: 600; }
+
 /* =========================================================
-   Buttons
+   Buttons — pill shaped, as in the Partner App
    ========================================================= */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 48px;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 
 .button .icon { width: 20px; height: 20px; }
 
 .button--primary {
-  background: var(--green);
+  background: var(--brand);
   color: #fff;
 }
 
-.button--primary:hover { background: var(--green-dark); }
+.button--primary:hover { background: var(--brand-hover); }
 
 .button--secondary {
-  background: var(--surface);
-  border-color: var(--green);
-  color: var(--green);
+  background: transparent;
+  border-color: var(--brand);
+  color: var(--brand-text);
 }
 
-.button--secondary:hover { background: var(--green-light); }
+.button--secondary:hover { background: var(--brand-soft); color: #fff; }
 
 .button--full { width: 100%; }
 
@@ -399,7 +399,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -423,13 +423,15 @@ button {
   border-radius: 50%;
 }
 
-.person-icon--translator { background: var(--orange-light); color: #9a4a00; }
+/* Same role colours as the call tiles: partner violet, translator cyan. */
+.person-icon--partner { background: var(--brand-soft); color: var(--brand-text); }
+.person-icon--translator { background: rgb(21 211 255 / 0.14); color: var(--cyan-text); }
 
 .people-plus {
   display: flex;
   justify-content: center;
   margin: -6px 0;
-  color: var(--orange);
+  color: #fff;
   position: relative;
   z-index: 1;
 }
@@ -437,38 +439,74 @@ button {
 .people-plus .icon {
   width: 28px;
   height: 28px;
-  padding: 4px;
+  padding: 5px;
   border-radius: 50%;
-  background: var(--surface);
-  border: 2px solid var(--orange);
+  background: var(--gradient);
+  box-shadow: 0 0 0 3px var(--bg);
 }
 
 .info-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface-muted);
+  background: rgb(255 255 255 / 0.03);
   color: var(--text);
 }
 
-.info-row .icon { color: var(--green); }
+.info-row .icon { color: var(--brand-text); }
 
 /* =========================================================
    Waiting
    ========================================================= */
+/* The waiting screen shows the spinner inside .screen-icon: drop the gradient circle there. */
+.screen-icon:has(.spinner) { background: transparent; }
+
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 4px solid rgb(18 122 75 / 0.2);
-  border-top-color: var(--green);
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgb(90 92 255 / 0.25);
+  border-top-color: var(--cyan);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Centred screens (connecting, call ended): everything in the middle, with a big button right under the text. */
+.screen--centered .screen-content {
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 10vh;
+  text-align: center;
+}
+.screen--centered .screen-icon { width: 96px; height: 96px; margin-bottom: 8px; }
+.screen--centered .spinner { width: 52px; height: 52px; border-width: 5px; }
+.screen--centered .screen-icon .icon { width: 48px; height: 48px; }
+.screen--centered .screen-title { font-size: 1.75rem; }
+.screen--centered .screen-text { max-width: 480px; font-size: 1.15rem; line-height: 1.5; }
+
+.waiting-cancel,
+.big-button {
+  min-width: min(100%, 300px);
+  min-height: 60px;
+  margin-top: 12px;
+  padding-inline: 32px;
+  font-size: 1.15rem;
+}
+
+/* Call ended: the Close button is the most visible element on the screen. */
+.big-button {
+  min-height: 64px;
+  margin-top: 16px;
+  padding-inline: 40px;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 16px rgb(90 92 255 / 0.45);
 }
 
 /* =========================================================
@@ -478,26 +516,32 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #0f1f18;
   color: #fff;
 }
-
-.call :focus-visible { outline-color: var(--focus-on-dark); }
 
 .call-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px 8px;
+  padding: 14px 16px 10px;
 }
 
-.call-title { font-size: 1.05rem; }
+/* The shared-call description sits on the same line as the "Assistance call" title (wraps below it on narrow screens). */
+.call-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 16px;
+  row-gap: 2px;
+}
+
+.call-title { font-size: 1.2rem; font-weight: 700; }
 
 .call-meta {
   display: flex;
   gap: 6px;
-  color: #c9d6cf;
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -511,18 +555,20 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4cd68a;
+  background: var(--success);
 }
 
 .call-timer {
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
+  padding: 3px 12px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: var(--radius-pill);
+  background: rgb(237 243 255 / 0.08);
   font-variant-numeric: tabular-nums;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
-/* One shared "room" frame around both participants. */
+/* One shared "room" frame around all three participants. */
 .call-stage {
   flex: 1;
   display: flex;
@@ -530,25 +576,24 @@ button {
   gap: 8px;
   margin: 0 12px;
   padding: 10px;
-  border: 1px solid rgb(255 255 255 / 0.14);
+  border: 1px solid rgb(255 255 255 / 0.1);
   border-radius: var(--radius);
-  background: rgb(255 255 255 / 0.04);
+  background: rgb(255 255 255 / 0.03);
 }
 
 .call-shared-note {
-  color: #c9d6cf;
-  font-size: 0.8rem;
-  text-align: center;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
-/* The client (main camera view) fills the stage; the translator is a small picture-in-picture bottom right. */
 .call-tiles {
   position: relative;
   flex: 1;
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
-  min-height: 220px;
+  min-height: 260px;
 }
 
 .tile {
@@ -560,26 +605,40 @@ button {
   overflow: hidden;
 }
 
-.tile--self { background: linear-gradient(160deg, #3a4752, #1f272e); }
+/* Same role palette as the Partner App call screen:
+   partner violet, translator cyan-blue, customer (you) indigo-slate. These show behind the photos
+   and when the camera is off. */
+.tile--partner { background: linear-gradient(160deg, #5a5cff, #2d2e80); }
+.tile--translator { background: linear-gradient(160deg, #1d86b0, #1b2f63); }
+.tile--self { background: linear-gradient(160deg, #34385e, #16162a); }
+.tile--camera-off { background: #101018; }
 
-.tile--translator {
+/* The translator (main view) fills the stage; the partner and you are small views in the two bottom corners. */
+.tile--translator .tile-name { top: 8px; bottom: auto; }
+
+.tile--partner,
+.tile--self {
   position: absolute;
-  right: 10px; /* physical right, also in RTL */
   bottom: 10px;
   z-index: 1;
-  width: 28%;
-  min-width: 84px;
-  max-width: 160px;
+  width: 30%;
+  min-width: 96px;
+  max-width: 170px;
   aspect-ratio: 4 / 5;
-  background: linear-gradient(160deg, #7a4a1a, #3d2510);
   border: 2px solid #fff;
-  border-radius: var(--radius-sm);
   box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
 }
 
-.tile--translator .tile-name { font-size: 0.7rem; padding: 1px 6px; bottom: 4px; inset-inline-start: 4px; }
-.tile--translator .tile-avatar { width: 36px; height: 36px; }
-.tile--translator .tile-avatar .icon { width: 20px; height: 20px; }
+/* Physical left / right corners, also in RTL. */
+.tile--partner { left: 10px; }
+.tile--self { right: 10px; }
+
+.tile--partner .tile-name,
+.tile--self .tile-name { font-size: 0.7rem; padding: 1px 6px; bottom: 4px; inset-inline-start: 4px; }
+.tile--partner .tile-avatar,
+.tile--self .tile-avatar { width: 36px; height: 36px; }
+.tile--partner .tile-avatar .icon,
+.tile--self .tile-avatar .icon { width: 20px; height: 20px; }
 
 .tile-photo {
   position: absolute;
@@ -588,7 +647,30 @@ button {
   height: 100%;
   object-fit: cover;
 }
-.tile--camera-off { background: #1a1f23; }
+
+/* The main view must always show the translator's whole face. The tile shape varies a lot (very wide on desktop, almost
+   portrait on phones), so the photo is "contained" on wide tiles over a blurred copy of itself, and "covered" (cropped
+   around the face) on squarer ones. */
+.tile--translator { container-type: size; }
+.tile--translator[style*='--tile-photo']::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  background: var(--tile-photo) center / cover no-repeat;
+  filter: blur(22px) brightness(0.85);
+}
+.tile--translator .tile-photo { object-fit: cover; object-position: 9% 50%; }
+@container (min-aspect-ratio: 7 / 5) {
+  /* The image box is sized to the photo itself (954x578), so its edges can be feathered into the backdrop.
+     It sits right of centre so the face stays clear of the bottom-left corner tile. */
+  .tile--translator .tile-photo {
+    inset: 0 auto 0 calc((100cqw - 100cqh * 954 / 578) * 0.62);
+    width: calc(100cqh * 954 / 578);
+    height: 100%;
+    object-fit: fill;
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+}
 
 .tile-avatar {
   display: flex;
@@ -597,7 +679,7 @@ button {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.16);
+  background: rgb(255 255 255 / 0.14);
   border: 2px solid rgb(255 255 255 / 0.35);
 }
 
@@ -610,8 +692,11 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(7 7 19 / 0.65);
   font-size: 0.75rem;
-  color: #e6ece9;
+  color: #fff;
 }
 
 .tile-status .icon,
@@ -619,22 +704,22 @@ button {
 
 .tile-name {
   position: absolute;
-  bottom: 6px;
-  inset-inline-start: 6px;
+  bottom: 8px;
+  inset-inline-start: 8px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  max-width: calc(100% - 12px);
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: rgb(0 0 0 / 0.6);
+  max-width: calc(100% - 16px);
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: rgb(7 7 19 / 0.7);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .tile-muted {
   display: inline-flex;
-  color: #ff9a9a;
+  color: var(--danger-text);
 }
 
 .call-controls {
@@ -645,7 +730,7 @@ button {
   /* Always reachable, even if the tiles need to scroll on short screens. */
   position: sticky;
   bottom: 0;
-  background: #0f1f18;
+  background: linear-gradient(transparent, var(--bg) 35%);
 }
 
 .control-button {
@@ -656,19 +741,19 @@ button {
   min-width: 80px;
   min-height: 60px;
   padding: 8px;
-  border: 2px solid rgb(255 255 255 / 0.25);
-  border-radius: var(--radius);
-  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 20px;
+  background: rgb(237 243 255 / 0.08);
   color: #fff;
 }
 
-.control-button:hover { background: rgb(255 255 255 / 0.18); }
+.control-button:hover { background: rgb(237 243 255 / 0.16); }
 
 /* Pressed (muted / camera off): inverted colours + slashed icon. */
 .control-button[aria-pressed='true'] {
   background: #fff;
   border-color: #fff;
-  color: var(--text);
+  color: var(--bg);
 }
 
 .control-button--end {
@@ -676,9 +761,9 @@ button {
   border-color: var(--danger);
 }
 
-.control-button--end:hover { background: var(--danger-dark); }
+.control-button--end:hover { background: var(--danger-hover); }
 
-.control-label { font-size: 0.75rem; font-weight: 600; }
+.control-label { font-size: 0.75rem; font-weight: 700; }
 
 /* =========================================================
    Reduced motion
@@ -692,38 +777,161 @@ button {
 
   /* Static loading indicator instead of a spinning one. */
   .spinner {
-    border-color: var(--green);
-    border-top-color: var(--green);
+    border-color: var(--brand);
+    border-top-color: var(--brand);
     border-style: dotted;
   }
 }
 
+/* Lobby (before everyone has joined): amber pulsing dot + text, empty seats, status card over the cameras. */
+.call-status-dot--waiting {
+  background: var(--warning);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+.call-timer--waiting {
+  border-style: dashed;
+  border-color: rgb(255 255 255 / 0.35);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.tile--pending {
+  background: rgb(255 255 255 / 0.03);
+  outline: 2px dashed rgb(255 255 255 / 0.28);
+  outline-offset: -2px;
+}
+
+.tile--pending .tile-avatar { opacity: 0.7; border-style: dashed; }
+
+/* Corner seats sit over the translator's picture, so an empty seat needs a solid background. */
+.tile--partner.tile--pending,
+.tile--self.tile--pending { background: var(--surface); }
+
+/* The translator's name label is at the top-left: put the state chip on the other side. */
+.tile--translator .tile-state { inset-inline-start: auto; inset-inline-end: 8px; }
+
+.tile-state {
+  position: absolute;
+  top: 8px;
+  inset-inline-start: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(7 7 19 / 0.65);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.tile-state .icon { width: 14px; height: 14px; }
+.tile-state--connected .icon { color: var(--success); }
+
+.spinner--small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  border-color: rgb(255 255 255 / 0.25);
+  border-top-color: var(--cyan);
+}
+
+.call-stage { position: relative; }
+
+.call-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.call-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 440px;
+  padding: 22px 26px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(rgb(14 14 28 / 0.9), rgb(14 14 28 / 0.9)) padding-box,
+    var(--gradient) border-box;
+  box-shadow: 0 16px 50px rgb(0 0 0 / 0.55), 0 0 60px rgb(90 92 255 / 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  text-align: center;
+  animation: overlay-in 0.25s ease-out;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.call-overlay-card--started {
+  background:
+    linear-gradient(rgb(10 26 14 / 0.92), rgb(10 26 14 / 0.92)) padding-box,
+    linear-gradient(120deg, var(--success), var(--cyan)) border-box;
+  box-shadow: 0 16px 50px rgb(0 0 0 / 0.55), 0 0 60px rgb(32 212 0 / 0.25);
+}
+
+.call-overlay-icon { width: 40px; height: 40px; color: var(--success-text); }
+.call-overlay-title { font-size: 1.15rem; font-weight: 700; line-height: 1.35; }
+.call-overlay-text { color: #c9c9d6; font-size: 0.9rem; }
+
+.call-page .tile--partner .tile-state,
+.call-page .tile--self .tile-state { top: 6px; inset-inline-start: 6px; font-size: 0.7rem; padding: 1px 8px; }
+
 /* =========================================================
-   Enlarged panel (header "Enlarge window" button)
-   Text screens stay a readable width; the call gets bigger tiles.
+   Separate call page (/call)
+   Reuses the panel layout (header, screens, call) at full page size.
    ========================================================= */
-.panel--expanded .screen-content,
-.panel--expanded .screen-actions {
+.call-page {
+  width: 100%;
+  height: 100dvh;
+  animation: none;
+}
+
+/* Text screens stay a readable width; the call gets big tiles. */
+.call-page .screen-content,
+.call-page .screen-actions {
   width: 100%;
   max-width: 640px;
   margin-inline: auto;
 }
 
-.panel--expanded .screen-actions { border-top: 0; }
+.call-page .screen-actions { border-top: 0; }
 
-.panel--expanded .call-header,
-.panel--expanded .call-controls { padding-inline: 24px; }
+.call-page .call-header,
+.call-page .call-controls { padding-inline: 24px; }
 
-.panel--expanded .call-stage { margin-inline: 24px; padding: 14px; }
+.call-page .call-stage { margin-inline: 24px; padding: 14px; border-radius: var(--radius-lg); }
 
-/* Client (main camera view) gets the whole stage; translator picture-in-picture grows a little. */
-.panel--expanded .call-tiles { min-height: 320px; }
+/* The translator gets the whole stage; the partner and you are bigger corner views. */
+.call-page .call-tiles { min-height: 360px; }
+.call-page .tile { border-radius: var(--radius); }
 
-.panel--expanded .tile--translator { right: 16px; bottom: 16px; width: 22%; max-width: 220px; }
+.call-page .tile--partner,
+.call-page .tile--self { bottom: 16px; width: 22%; max-width: 240px; }
+.call-page .tile--partner { left: 16px; }
+.call-page .tile--self { right: 16px; }
 
-.panel--expanded .tile--self .tile-avatar { width: 96px; height: 96px; }
-.panel--expanded .tile--self .tile-avatar .icon { width: 44px; height: 44px; }
-.panel--expanded .tile--self .tile-name { font-size: 0.95rem; padding: 4px 10px; }
+.call-page .tile--partner .tile-name,
+.call-page .tile--self .tile-name { font-size: 0.8rem; padding: 2px 8px; }
+
+.call-page .tile--translator .tile-avatar { width: 96px; height: 96px; }
+.call-page .tile--translator .tile-avatar .icon { width: 44px; height: 44px; }
+.call-page .tile--translator .tile-name { font-size: 0.95rem; padding: 4px 10px; }
 
 /* =========================================================
    Call rating (call ended screen)
@@ -733,6 +941,7 @@ button {
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .rating-legend {
@@ -753,11 +962,11 @@ button {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-sm);
-  color: #6b7a73;            /* outline star: 4.5:1 on white */
+  color: #8b8b96;            /* outline star: ≥ 4.5:1 on the dark card */
   cursor: pointer;
 }
 
-.rating-star.is-filled { color: #b85f00; }
+.rating-star.is-filled { color: var(--warning); }
 
 .rating-star:has(input:focus-visible) {
   outline: 3px solid var(--focus);
@@ -772,7 +981,72 @@ button {
 .rating-status {
   min-height: 1.5em;
   margin-top: 6px;
-  color: var(--green-dark);
+  color: var(--success-text);
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+/* =========================================================
+   Confirmation dialog (same look in the widget, the Partner App and the Translator app)
+   ========================================================= */
+.dialog {
+  width: min(340px, calc(100vw - 32px));
+  padding: 20px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  color: #0f1b2d;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.5);
+}
+
+.dialog::backdrop {
+  background: rgb(8 12 22 / 0.6);
+}
+
+.dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.dialog-text {
+  margin: 0 0 18px;
+  color: #566274;
+  font-size: 0.9375rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-button {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dialog-button--cancel {
+  background: #fff;
+  border-color: #b8c1cf;
+  color: #0f1b2d;
+}
+
+.dialog-button--cancel:hover {
+  background: #f1f4f8;
+}
+
+.dialog-button--confirm {
+  background: #c62828;
+  color: #fff;
+}
+
+.dialog-button--confirm:hover {
+  background: #a91f1f;
 }

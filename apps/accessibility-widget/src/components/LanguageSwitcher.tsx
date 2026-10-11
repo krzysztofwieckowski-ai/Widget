@@ -3,32 +3,28 @@ import type { Language } from '../types';
 type LanguageSwitcherProps = {
   language: Language;
   onChange: (language: Language) => void;
-  groupLabel: string;
+  tooltip: string;
 };
 
-const OPTIONS: { value: Language; label: string }[] = [
-  { value: 'ar', label: 'العربية' },
-  { value: 'en', label: 'English' },
-];
+// The button always offers the *other* language, written in that language.
+const OTHER_LANGUAGE: Record<Language, { value: Language; label: string }> = {
+  ar: { value: 'en', label: 'English' },
+  en: { value: 'ar', label: 'العربية' },
+};
 
-export default function LanguageSwitcher({ language, onChange, groupLabel }: LanguageSwitcherProps) {
+/** Compact header toggle between Arabic and English. */
+export default function LanguageSwitcher({ language, onChange, tooltip }: LanguageSwitcherProps) {
+  const other = OTHER_LANGUAGE[language];
+
   return (
-    <div className="language-switcher" role="group" aria-label={groupLabel}>
-      {OPTIONS.map((option) => {
-        const isActive = option.value === language;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            lang={option.value}
-            className="language-option"
-            aria-pressed={isActive}
-            onClick={() => onChange(option.value)}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
+    <button
+      type="button"
+      className="language-toggle"
+      lang={other.value}
+      title={tooltip}
+      onClick={() => onChange(other.value)}
+    >
+      {other.label}
+    </button>
   );
 }

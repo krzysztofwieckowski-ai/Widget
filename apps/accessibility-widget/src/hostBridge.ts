@@ -2,8 +2,8 @@
  * The only link between the widget and the host page (e.g. the bank website).
  *
  * The widget runs inside an iframe, so it cannot resize itself. It tells the
- * host page whether it is open (and enlarged), and the host resizes the iframe:
- * small for the launcher button, panel-sized when open, almost full-window when expanded.
+ * host page whether it is open, and the host resizes the iframe:
+ * small for the launcher button, panel-sized when open.
  */
 
 // Origin of the page allowed to receive our messages (the website embedding the widget).
@@ -16,11 +16,10 @@ export type WidgetMessage = {
   source: 'accessibility-widget';
   type: 'widget:state';
   open: boolean;
-  expanded: boolean;
 };
 
-export function notifyHost(open: boolean, expanded: boolean) {
+export function notifyHost(open: boolean) {
   if (!isEmbedded) return;
-  const message: WidgetMessage = { source: 'accessibility-widget', type: 'widget:state', open, expanded };
+  const message: WidgetMessage = { source: 'accessibility-widget', type: 'widget:state', open };
   window.parent.postMessage(message, HOST_ORIGIN);
 }

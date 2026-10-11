@@ -1,0 +1,63 @@
+import type { IncomingCall as IncomingCallData } from '../../types';
+import type { Translation } from '../../i18n';
+import { BellOffIcon, PhoneEndIcon, PhoneIncomingIcon, VideoIcon } from '../icons';
+
+type IncomingCallProps = {
+  t: Translation;
+  call: IncomingCallData;
+  companyName: string;
+  onJoin: () => void;
+  onDecline: () => void;
+  isRinging: boolean;
+  onSilence: () => void;
+};
+
+/**
+ * Incoming call card on the dashboard. The arrival itself is announced by App
+ * (live region, ringtone, tab title, system notification when the tab is hidden).
+ */
+export default function IncomingCall({ t, call, companyName, onJoin, onDecline, isRinging, onSilence }: IncomingCallProps) {
+  return (
+    <article className="incoming-call" aria-labelledby="incoming-call-title">
+      <div className={`incoming-call-icon${isRinging ? ' incoming-call-icon--ringing' : ''}`} aria-hidden="true">
+        <PhoneIncomingIcon />
+      </div>
+      <div className="incoming-call-body">
+        <h3 id="incoming-call-title" className="incoming-call-title">
+          {t.newAccessibilityCall}
+        </h3>
+        <dl className="incoming-call-details">
+          <div>
+            <dt>{t.company}</dt>
+            <dd>{companyName}</dd>
+          </div>
+          <div>
+            <dt>{t.callId}</dt>
+            <dd>
+              <span dir="ltr">{call.callId}</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <div className="incoming-call-actions">
+        <button
+          type="button"
+          className="button button--ghost button--small"
+          aria-disabled={!isRinging}
+          onClick={isRinging ? onSilence : undefined}
+        >
+          <BellOffIcon />
+          {isRinging ? t.silenceRingtone : t.ringtoneOff}
+        </button>
+        <button type="button" className="button button--danger-outline" onClick={onDecline}>
+          <PhoneEndIcon />
+          {t.declineCall}
+        </button>
+        <button type="button" className="button button--primary incoming-call-join" onClick={onJoin}>
+          <VideoIcon />
+          {t.joinCall}
+        </button>
+      </div>
+    </article>
+  );
+}

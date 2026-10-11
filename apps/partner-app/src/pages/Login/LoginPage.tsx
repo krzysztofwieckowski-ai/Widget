@@ -1,0 +1,111 @@
+import { useState, type FormEvent } from 'react';
+import type { Language } from '../../types';
+import type { Translation } from '../../i18n';
+import LanguageSwitcher from '../../components/LanguageSwitcher/LanguageSwitcher';
+import { AccessibilityIcon, EyeIcon, EyeOffIcon } from '../../components/icons';
+
+type LoginPageProps = {
+  t: Translation;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
+  /** Returns false when the login is rejected. */
+  onLogin: (login: string, password: string) => boolean;
+};
+
+/** Mock login: "admin" opens the Admin Panel, any other valid email the Partner Portal; any password. */
+export default function LoginPage({ t, language, onLanguageChange, onLogin }: LoginPageProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setHasError(!onLogin(email, password));
+  }
+
+  const passwordToggleLabel = showPassword ? t.hidePassword : t.showPassword;
+
+  return (
+    <main className="login">
+      <div className="login-card">
+        <header className="login-header">
+          <span className="brand-mark" aria-hidden="true">
+            <AccessibilityIcon />
+          </span>
+          <span className="brand-text">
+            <span className="brand-title">{t.appName}</span>
+            <span className="brand-subtitle">{t.portalName}</span>
+          </span>
+          <LanguageSwitcher language={language} onChange={onLanguageChange} groupLabel={t.languageSwitcher} />
+        </header>
+
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
+          <div>
+            <h1 className="login-title" tabIndex={-1} data-page-heading>
+              {t.loginTitle}
+            </h1>
+            <p className="muted">{t.loginDescription}</p>
+          </div>
+
+          {hasError && (
+            <p id="login-error" className="form-error" role="alert">
+              {t.loginError}
+            </p>
+          )}
+
+          <div className="field">
+            <label htmlFor="email" className="field-label">
+              {t.email}
+            </label>
+            <input
+              id="email"
+              className="input"
+              type="email"
+              dir="ltr"
+              autoComplete="username"
+              value={email}
+              aria-invalid={hasError}
+              aria-describedby={hasError ? 'login-error' : undefined}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="password" className="field-label">
+              {t.password}
+            </label>
+            <div className="input-with-button">
+              <input
+                id="password"
+                className="input"
+                type={showPassword ? 'text' : 'password'}
+                dir="ltr"
+                autoComplete="current-password"
+                value={password}
+                aria-invalid={hasError}
+                aria-describedby={hasError ? 'login-error' : undefined}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+              <button
+                type="button"
+                className="input-button"
+                aria-label={passwordToggleLabel}
+                title={passwordToggleLabel}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((shown) => !shown)}
+              >
+                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" className="button button--primary button--full">
+            {t.loginButton}
+          </button>
+
+        </form>
+      </div>
+    </main>
+  );
+}

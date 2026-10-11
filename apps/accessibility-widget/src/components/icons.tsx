@@ -149,23 +149,6 @@ export function ChevronForwardIcon(props: IconProps) {
   );
 }
 
-export function ExpandIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
-    </Icon>
-  );
-}
-
-export function CollapseIcon(props: IconProps) {
-  return (
-    <Icon {...props}>
-      <path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7" />
-    </Icon>
-  );
-}
-
-/** Filled vs. outlined shape shows the state, not colour alone. */
 export function StarIcon({ filled, ...props }: IconProps & { filled: boolean }) {
   return (
     <Icon {...props}>
@@ -173,6 +156,15 @@ export function StarIcon({ filled, ...props }: IconProps & { filled: boolean }) 
         d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"
         fill={filled ? 'currentColor' : 'none'}
       />
+    </Icon>
+  );
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M12 7v5l3 2" />
     </Icon>
   );
 }

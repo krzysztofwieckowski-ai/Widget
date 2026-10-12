@@ -1,5 +1,6 @@
 import type { Translation } from '../i18n';
 import type { CallRecord, Language } from '../types';
+import { TranslatorIcon } from '../components/icons';
 import { localName, mockTranslator } from '../mock/translator';
 
 type ProfilePageProps = {
@@ -29,7 +30,9 @@ export default function ProfilePage({
       </h1>
 
       <div className="profile-head">
-        <img className="profile-photo" src={mockTranslator.photo} alt="" />
+        <span className="profile-photo" aria-hidden="true">
+          <TranslatorIcon />
+        </span>
         <div>
           <p className="profile-name">{localName(mockTranslator, language)}</p>
           <p className="profile-meta">

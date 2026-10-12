@@ -27,7 +27,7 @@ export const ar: Translation = {
   stateConnecting: 'جارٍ الاتصال...',
   roleUser: 'المستخدم',
   rolePartner: 'الشريك',
-  roleYou: 'أنت · المترجم',
+  roleTranslator: 'المترجم',
   you: 'أنت',
   mute: 'كتم',
   camera: 'الكاميرا',

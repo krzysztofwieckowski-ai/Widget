@@ -157,3 +157,32 @@ export function CloseIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function AccessibilityIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="4.5" r="1.8" fill="currentColor" stroke="none" />
+      <path d="M4.5 8.5c2.5.7 5 1 7.5 1s5-.3 7.5-1" />
+      <path d="M12 9.5v4.5M12 14l-3.2 6.5M12 14l3.2 6.5" />
+    </Icon>
+  );
+}
+
+export function HeadsetIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+      <path d="M4 14h3v5H5.5A1.5 1.5 0 0 1 4 17.5zM20 14h-3v5h1.5a1.5 1.5 0 0 0 1.5-1.5z" />
+      <path d="M18 19c0 1.5-1.5 2.5-4 2.5h-1.5" />
+    </Icon>
+  );
+}
+
+export function TranslatorIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M4 5h9M8.5 3v2M6 5c1 3.5 3.5 6 6.5 7.5M11 5c-1 3.5-3.5 6.5-7 8" />
+      <path d="M13 21l4-9 4 9M14.5 17.5h5" />
+    </Icon>
+  );
+}

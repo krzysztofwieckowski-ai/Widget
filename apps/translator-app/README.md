@@ -15,7 +15,7 @@ npm run dev -w translator-app      # or: npm run dev:translator (from the repo r
 | **Home** | "Welcome <name>" and the **3-ways call** card (navy card, green phone button; the whole card is the button). Tapping it puts the translator straight into a 3-way call. In a real system the call would be pushed from the platform when a partner starts it; here it is simulated. Disabled when availability is off (Profile). |
 | **Call** | Same pattern as the Partner's call. The translator is in the room right away; the **user joins after about 4 s and the partner after another 4 s** (*Searching…* → *Connecting…* → *Connected*). Until all three are in there is no video, the pill says *Not started* and the red button says *Leave*. Then the call starts: user = large main view, partner and you = small corner tiles, timer runs, red button says *End call*. Mute and Camera are visual toggles. **Leave / End call** works as in the Partner App and the widget: a confirmation dialog (Cancel / Leave or End call), then back to Home. No "call ended" screen; only a call left before it started shows a dismissible message on Home and is stored in History as *Not started*. |
 | **History** | Past calls with company, user, partner, date, duration and outcome (*Completed* / *Not started*). New calls are added at the top (kept in memory only). |
-| **Profile** | Photo, languages, call statistics, **availability** switch and the English / Arabic switch. |
+| **Profile** | Icon, languages, call statistics, **availability** switch and the English / Arabic switch. |
 
 The bottom green tab bar (Home / History / Profile) is hidden during the call.
 
@@ -32,4 +32,4 @@ src/
 └── index.css             # all styles (light UI, dark call screen)
 ```
 
-The lobby timeline lives in `src/mock/translator.ts` (`USER_FOUND_MS`, `USER_JOINED_MS`, `PARTNER_FOUND_MS`, `PARTNER_JOINED_MS`). Faces are photos in `public/images/` (`pwd.jpg` = user, `partner.jpg`, `translator.jpg` = you).
+The lobby timeline lives in `src/mock/translator.ts` (`USER_FOUND_MS`, `USER_JOINED_MS`, `PARTNER_FOUND_MS`, `PARTNER_JOINED_MS`). Each tile shows a role icon with a caption (**USER**, **PARTNER**, **TRANSLATOR**) instead of a photo; `public/images/` is no longer used.

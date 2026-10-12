@@ -161,8 +161,7 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               variant="pwd"
               name={t.pwdUser}
               avatar={<AccessibilityIcon />}
-              photo="/images/pwd.jpg"
-              showVideo={isStarted}
+              roleLabel={t.pwdUser}
               state={userState}
               stateLabel={
                 {
@@ -179,8 +178,7 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               name={displayName(partner, language)}
               role={`${t.partnerRole} · ${t.you}`}
               avatar={<HeadsetIcon />}
-              photo="/images/partner.jpg"
-              showVideo={isStarted}
+              roleLabel={t.tileRolePartner}
               state="connected"
               stateLabel={isStarted ? t.stateConnected : t.stateJoined}
               muted={muted}
@@ -193,8 +191,7 @@ export default function CallPage({ t, language, partner, companyName, call, onEn
               name={translatorFound ? translatorName : t.translator}
               role={translatorFound ? `${t.translator} · ${translatorLanguages}` : undefined}
               avatar={<TranslatorIcon />}
-              photo="/images/translator.jpg"
-              showVideo={isStarted}
+              roleLabel={t.translator}
               state={translatorState}
               stateLabel={
                 {

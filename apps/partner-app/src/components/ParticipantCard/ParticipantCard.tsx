@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { CheckCircleIcon, ClockIcon, MicOffIcon, VideoOffIcon } from '../icons';
 
 export type ParticipantState = 'connected' | 'searching' | 'connecting';
@@ -7,10 +7,8 @@ type ParticipantCardProps = {
   name: string;
   role?: string;
   avatar: ReactNode;
-  /** Mock "video": a still photo shown while the participant is connected and their camera is on. */
-  photo?: string;
-  /** False in the lobby: no pictures until all three people are in the room. */
-  showVideo?: boolean;
+  /** Caption under the icon: USER / PARTNER / TRANSLATOR. */
+  roleLabel: string;
   variant: 'pwd' | 'partner' | 'translator';
   state: ParticipantState;
   stateLabel: string;
@@ -21,16 +19,15 @@ type ParticipantCardProps = {
 };
 
 /**
- * A fake video tile, same structure as the PWD widget's ParticipantTile:
- * gradient "video" background, round avatar, name label in the bottom corner.
+ * A mock video tile, same structure as the PWD widget's ParticipantTile:
+ * gradient background, round role icon with a caption (USER / PARTNER / TRANSLATOR), name label in the bottom corner.
  * Adds a connection state chip (icon + text) for the partner view.
  */
 export default function ParticipantCard({
   name,
   role,
   avatar,
-  photo,
-  showVideo = true,
+  roleLabel,
   variant,
   state,
   stateLabel,
@@ -40,7 +37,6 @@ export default function ParticipantCard({
   cameraOffLabel,
 }: ParticipantCardProps) {
   const isPending = state !== 'connected';
-  const showPhoto = Boolean(photo) && showVideo && !isPending && !cameraOff;
   const classes = [
     'tile',
     `tile--${variant}`,
@@ -51,10 +47,7 @@ export default function ParticipantCard({
     .join(' ');
 
   return (
-    <li
-      className={classes}
-      style={showPhoto ? ({ '--tile-photo': `url(${photo})` } as CSSProperties) : undefined}
-    >
+    <li className={classes}>
       <span className={`tile-state tile-state--${state}`}>
         {state === 'connected' && <CheckCircleIcon />}
         {state === 'searching' && <ClockIcon />}
@@ -69,11 +62,10 @@ export default function ParticipantCard({
         </span>
       )}
 
-      {showPhoto ? (
-        <img className="tile-photo" src={photo} alt="" />
-      ) : (
+      <div className="tile-identity">
         <div className="tile-avatar">{avatar}</div>
-      )}
+        <span className="tile-role-caption">{roleLabel}</span>
+      </div>
 
       <span className="tile-name">
         {muted && (

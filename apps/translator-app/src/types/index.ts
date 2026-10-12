@@ -36,5 +36,4 @@ export type CallResult = {
 
 export type Translator = LocalizedName & {
   id: string;
-  photo: string;
 };

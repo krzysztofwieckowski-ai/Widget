@@ -86,6 +86,7 @@ export const en = {
   participants: 'Participants',
   callDuration: 'Call duration',
   pwdUser: 'User',
+  tileRolePartner: 'Partner',
   partnerRole: 'Consultant',
   you: 'You',
   translator: 'Translator',

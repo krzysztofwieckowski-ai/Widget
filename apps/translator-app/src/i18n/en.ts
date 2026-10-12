@@ -25,7 +25,7 @@ export const en = {
   stateConnecting: 'Connecting...',
   roleUser: 'User',
   rolePartner: 'Partner',
-  roleYou: 'You · translator',
+  roleTranslator: 'Translator',
   you: 'You',
   mute: 'Mute',
   camera: 'Camera',

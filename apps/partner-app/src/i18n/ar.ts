@@ -81,6 +81,7 @@ export const ar: Translation = {
   participants: 'المشاركون',
   callDuration: 'مدة المكالمة',
   pwdUser: 'المستخدم',
+  tileRolePartner: 'الشريك',
   partnerRole: 'المستشار',
   you: 'أنت',
   translator: 'المترجم',

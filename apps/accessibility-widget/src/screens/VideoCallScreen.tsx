@@ -3,7 +3,7 @@ import type { Translation } from '../i18n';
 import ParticipantTile, { type ParticipantState } from '../components/ParticipantTile';
 import CallControls from '../components/CallControls';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { CheckCircleIcon, TranslatorIcon, UserIcon } from '../components/icons';
+import { AccessibilityIcon, CheckCircleIcon, HeadsetIcon, TranslatorIcon } from '../components/icons';
 
 type Props = {
   t: Translation;
@@ -171,31 +171,31 @@ export default function VideoCallScreen({ t, available, onEndCall, onLeave, onUn
             variant="translator"
             name={t.translator}
             avatar={<TranslatorIcon />}
-            photo="/images/translator.jpg"
+            roleLabel={t.translator}
             state={translatorState}
             stateLabel={stateLabels[translatorState]}
-            showVideo={isStarted}
+            isStarted={isStarted}
             cameraOffLabel={t.cameraOff}
             mutedLabel={t.micOff}
           />
           <ParticipantTile
             variant="partner"
             name={partnerFound ? `${t.partner}: ${t.partnerName}` : t.partner}
-            avatar={<UserIcon />}
-            photo="/images/partner.jpg"
+            avatar={<HeadsetIcon />}
+            roleLabel={t.partner}
             state={partnerState}
             stateLabel={stateLabels[partnerState]}
-            showVideo={isStarted}
+            isStarted={isStarted}
             cameraOffLabel={t.cameraOff}
             mutedLabel={t.micOff}
           />
           <ParticipantTile
             variant="self"
             name={t.you}
-            avatar={<UserIcon />}
-            photo="/images/you.jpg"
+            avatar={<AccessibilityIcon />}
+            roleLabel={t.user}
             stateLabel={stateLabels.connected}
-            showVideo={isStarted}
+            isStarted={isStarted}
             muted={muted}
             cameraOff={cameraOff}
             cameraOffLabel={t.cameraOff}

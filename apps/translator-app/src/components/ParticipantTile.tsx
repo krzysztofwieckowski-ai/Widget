@@ -1,17 +1,15 @@
-import type { CSSProperties } from 'react';
+import type { ReactNode } from 'react';
 import { CheckCircleIcon, ClockIcon, MicOffIcon, VideoOffIcon } from './icons';
 
 export type ParticipantState = 'connected' | 'searching' | 'connecting';
 
 type ParticipantTileProps = {
   name: string;
-  role: string;
-  initial: string;
-  /** Mock "video": a still photo shown while the participant is connected and their camera is on. */
-  photo: string;
-  /** False in the lobby: no pictures until all three people are in the room. */
-  showVideo: boolean;
-  /** main = large tile filling the stage; self / other = small corner tiles. */
+  /** Role icon shown in the tile. */
+  icon: ReactNode;
+  /** Caption under the icon: USER / PARTNER / TRANSLATOR. */
+  roleLabel: string;
+  /** main = large tile filling the stage; start / end = small corner tiles. */
   position: 'main' | 'start' | 'end';
   variant: 'user' | 'partner' | 'translator';
   state: ParticipantState;
@@ -22,13 +20,11 @@ type ParticipantTileProps = {
   cameraOffLabel: string;
 };
 
-/** A fake video tile: photo (or avatar), connection state chip and name label. */
+/** A mock video tile: role icon with a caption (no photos), connection state chip and name label. */
 export default function ParticipantTile({
   name,
-  role,
-  initial,
-  photo,
-  showVideo,
+  icon,
+  roleLabel,
   position,
   variant,
   state,
@@ -39,7 +35,6 @@ export default function ParticipantTile({
   cameraOffLabel,
 }: ParticipantTileProps) {
   const isPending = state !== 'connected';
-  const showPhoto = showVideo && !isPending && !cameraOff;
   const classes = [
     'tile',
     `tile--${variant}`,
@@ -51,7 +46,7 @@ export default function ParticipantTile({
     .join(' ');
 
   return (
-    <li className={classes} style={showPhoto ? ({ '--tile-photo': `url(${photo})` } as CSSProperties) : undefined}>
+    <li className={classes}>
       <span className={`tile-state tile-state--${state}`}>
         {state === 'connected' && <CheckCircleIcon />}
         {state === 'searching' && <ClockIcon />}
@@ -66,13 +61,12 @@ export default function ParticipantTile({
         </span>
       )}
 
-      {showPhoto ? (
-        <img className="tile-photo" src={photo} alt="" />
-      ) : (
+      <div className="tile-identity">
         <div className="tile-avatar" aria-hidden="true">
-          {initial}
+          {icon}
         </div>
-      )}
+        <span className="tile-role-caption">{roleLabel}</span>
+      </div>
 
       <span className="tile-name">
         {muted && (
@@ -81,10 +75,7 @@ export default function ParticipantTile({
             <span className="visually-hidden">{mutedLabel}</span>
           </span>
         )}
-        <span className="tile-name-text">
-          <span className="tile-person">{name}</span>
-          <span className="tile-role">{role}</span>
-        </span>
+        <span className="tile-person">{name}</span>
       </span>
     </li>
   );

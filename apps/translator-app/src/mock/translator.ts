@@ -4,7 +4,6 @@ export const mockTranslator: Translator = {
   id: 'translator-001',
   name: 'Ahmed Ali',
   nameAr: 'أحمد علي',
-  photo: '/images/translator.jpg',
 };
 
 /**

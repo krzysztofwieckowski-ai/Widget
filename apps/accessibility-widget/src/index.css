@@ -640,38 +640,6 @@ button {
 .tile--partner .tile-avatar .icon,
 .tile--self .tile-avatar .icon { width: 20px; height: 20px; }
 
-.tile-photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* The main view must always show the translator's whole face. The tile shape varies a lot (very wide on desktop, almost
-   portrait on phones), so the photo is "contained" on wide tiles over a blurred copy of itself, and "covered" (cropped
-   around the face) on squarer ones. */
-.tile--translator { container-type: size; }
-.tile--translator[style*='--tile-photo']::before {
-  content: '';
-  position: absolute;
-  inset: -24px;
-  background: var(--tile-photo) center / cover no-repeat;
-  filter: blur(22px) brightness(0.85);
-}
-.tile--translator .tile-photo { object-fit: cover; object-position: 9% 50%; }
-@container (min-aspect-ratio: 7 / 5) {
-  /* The image box is sized to the photo itself (954x578), so its edges can be feathered into the backdrop.
-     It sits right of centre so the face stays clear of the bottom-left corner tile. */
-  .tile--translator .tile-photo {
-    inset: 0 auto 0 calc((100cqw - 100cqh * 954 / 578) * 0.62);
-    width: calc(100cqh * 954 / 578);
-    height: 100%;
-    object-fit: fill;
-    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-  }
-}
-
 .tile-avatar {
   display: flex;
   align-items: center;
@@ -1050,3 +1018,25 @@ button {
 .dialog-button--confirm:hover {
   background: #a91f1f;
 }
+
+/* Role icon + caption (USER / PARTNER / TRANSLATOR) instead of camera pictures. */
+.tile-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tile-role-caption {
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+[dir='rtl'] .tile-role-caption { letter-spacing: 0; }
+
+.tile--partner .tile-role-caption,
+.tile--self .tile-role-caption { font-size: 0.62rem; letter-spacing: 0.08em; }
+.call-page .tile--translator .tile-role-caption { font-size: 1.1rem; }

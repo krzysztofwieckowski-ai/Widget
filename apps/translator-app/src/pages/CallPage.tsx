@@ -3,6 +3,7 @@ import type { Translation } from '../i18n';
 import type { CallResult, IncomingCall, Language } from '../types';
 import CallControls from '../components/CallControls';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { AccessibilityIcon, HeadsetIcon, TranslatorIcon } from '../components/icons';
 import ParticipantTile, { type ParticipantState } from '../components/ParticipantTile';
 import {
   PARTNER_FOUND_MS,
@@ -10,7 +11,6 @@ import {
   USER_FOUND_MS,
   USER_JOINED_MS,
   localName,
-  mockTranslator,
 } from '../mock/translator';
 import { formatDuration } from '../utils';
 
@@ -72,7 +72,6 @@ export default function CallPage({ t, language, call, onEnd }: CallPageProps) {
 
   const userName = localName(call.user, language);
   const partnerName = localName(call.partner, language);
-  const youName = localName(mockTranslator, language);
 
   const finish = () => {
     setConfirmOpen(false);
@@ -108,10 +107,8 @@ export default function CallPage({ t, language, call, onEnd }: CallPageProps) {
             position="main"
             variant="user"
             name={userName}
-            role={t.roleUser}
-            initial={userName.charAt(0)}
-            photo="/images/pwd.jpg"
-            showVideo={isStarted}
+            icon={<AccessibilityIcon />}
+            roleLabel={t.roleUser}
             state={userState}
             stateLabel={stateLabel(userState)}
             mutedLabel={t.mutedLabel}
@@ -121,10 +118,8 @@ export default function CallPage({ t, language, call, onEnd }: CallPageProps) {
             position="start"
             variant="translator"
             name={t.you}
-            role={t.roleYou}
-            initial={youName.charAt(0)}
-            photo="/images/translator.jpg"
-            showVideo={isStarted}
+            icon={<TranslatorIcon />}
+            roleLabel={t.roleTranslator}
             state="connected"
             stateLabel={t.stateConnected}
             muted={muted}
@@ -136,10 +131,8 @@ export default function CallPage({ t, language, call, onEnd }: CallPageProps) {
             position="end"
             variant="partner"
             name={partnerName}
-            role={t.rolePartner}
-            initial={partnerName.charAt(0)}
-            photo="/images/partner.jpg"
-            showVideo={isStarted}
+            icon={<HeadsetIcon />}
+            roleLabel={t.rolePartner}
             state={partnerState}
             stateLabel={stateLabel(partnerState)}
             mutedLabel={t.mutedLabel}
